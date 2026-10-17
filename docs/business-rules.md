@@ -1,11 +1,11 @@
-# Scope & Business Rules — E-Wallet MVP
+# Business Rules — E-Wallet MVP
 
 > Trạng thái: **DRAFT — chờ review** · Cập nhật: 2026-10-16
-> Liên quan: [planning.md](planning.md)
+> Đổi tên từ `scope.md`. Liên quan: [README](README.md) · [prd.md](prd.md) · [urd.md](urd.md) · [fsd/](fsd/)
 
 ## 1. Mục đích & disclaimer
 
-Tài liệu này chốt **phạm vi MVP** và **quy tắc nghiệp vụ** cho `wallet-core`, trả lời checklist §3.3 trong `planning.md`.
+Tài liệu này chốt **phạm vi MVP** và **quy tắc nghiệp vụ** cho `wallet-core`, là nguồn duy nhất cho mọi quy tắc `BR-xx` được URD, FSD, ERD và API tham chiếu.
 
 - Mỗi quy tắc có mã `BR-xx` và nhãn:
   - **[L]** — xuất phát từ quy định pháp luật hiện hành (có căn cứ).
@@ -77,7 +77,7 @@ Ví tổ chức / hộ kinh doanh; ví cho người dưới 18 tuổi hoặc ng�
 | BR-11 | **Không** liên kết thẻ tín dụng làm nguồn nạp. | [L] | TT45. |
 | BR-12 | Mỗi khách hàng được liên kết tối đa **3** nguồn. | [P] | Luật cho phép nhiều; giới hạn để MVP gọn. |
 | BR-13 | Phải duy trì ≥ 1 liên kết: **không cho hủy liên kết cuối cùng** khi ví còn hoạt động; muốn bỏ hết thì phải đóng ví (BR-62). | [L] | TT40 Đ24 — duy trì liên kết suốt thời gian sử dụng ví. |
-| BR-14 | Liên kết qua OTP do corebank (giả lập) gửi; wallet **không** lưu mật khẩu Internet Banking. Corebank timeout → liên kết giữ `PENDING`, tra cứu lại. | [P] | planning §6.1. |
+| BR-14 | Liên kết qua OTP do corebank (giả lập) gửi; wallet **không** lưu mật khẩu Internet Banking. Corebank timeout → liên kết giữ `PENDING`, tra cứu lại. | [P] | fsd/02. |
 
 ### C. Luồng tiền & hạn mức
 
@@ -105,6 +105,7 @@ Ví tổ chức / hộ kinh doanh; ví cho người dưới 18 tuổi hoặc ng�
 | BR-38 | Mỗi KH chỉ có **1 thiết bị đang hoạt động**. Đăng nhập trên thiết bị mới phải qua OTP + so khớp khuôn mặt; thiết bị cũ bị hủy gắn. Trong 24 giờ đầu sau khi đổi thiết bị, áp hạn mức 10.000.000đ/ngày. | [L]/[P] | TT50/TT77 có yêu cầu bảo mật thiết bị; các con số là [P]. |
 | BR-39 | Sai PIN **5 lần liên tiếp** → khóa giao dịch **30 phút**; sai liên tiếp sau đó → khóa tới khi đặt lại PIN (qua OTP + khuôn mặt). | [P] | |
 | BR-40 | Xác thực phải gắn với đúng giao dịch: challenge (OTP/face) chứa `transaction_id`, số tiền, người nhận; dùng một lần, hết hạn sau 5 phút. | [P] | Chống replay. |
+| BR-41 | PIN là 6 chữ số, **không** chấp nhận chuỗi lặp (`111111`) hoặc tăng/giảm liên tiếp (`123456`, `654321`) và không trùng ngày sinh dạng `DDMMYY`. | [P] | Bổ sung từ URD US-03. |
 
 ### E. Trạng thái giao dịch & xử lý lỗi
 
@@ -114,8 +115,8 @@ Ví tổ chức / hộ kinh doanh; ví cho người dưới 18 tuổi hoặc ng�
 | BR-46 | Ngân hàng timeout / không rõ kết quả → hiển thị **"Đang xử lý" (`PENDING`)**, **không bao giờ** tự báo thất bại khi chưa có xác nhận. Worker tra cứu lại với backoff; sau **24 giờ** chưa rõ → `NEEDS_RECONCILIATION`, chuyển cho vận hành. | [P] | Trả lời câu "ngân hàng timeout thì hiển thị gì". |
 | BR-47 | Chuyển ví–ví là **tức thời, đồng bộ và không hủy được**. Chuyển nhầm → xử lý qua tra soát (BR-60), người nhận phải đồng ý hoàn. | [P] | |
 | BR-48 | KH **không được hủy** giao dịch sau khi đã ghi nợ. Sai sót chỉ được sửa bằng **bút toán đảo** (hệ thống/vận hành, maker–checker) hoặc **hoàn tiền** (merchant khởi tạo, ≤ số đã thanh toán, trong 90 ngày). | [P] | Trả lời câu "có cho phép hủy sau khi ghi nợ". |
-| BR-49 | Nạp tiền: chỉ ghi có ví khi corebank **xác nhận** đã ghi nợ TK nguồn. Retry/tra cứu luôn dùng cùng `bank_operation_id`. | [P] | planning §6.2. |
-| BR-50 | Rút/chuyển ra NH: giữ chỗ (hold) số tiền khi tạo lệnh. Thất bại **chắc chắn** → giải phóng hold ngay. Kết quả không rõ → **giữ nguyên hold** cho tới khi tra cứu hoặc đối soát có kết luận. | [P] | planning §6.4. |
+| BR-49 | Nạp tiền: chỉ ghi có ví khi corebank **xác nhận** đã ghi nợ TK nguồn. Retry/tra cứu luôn dùng cùng `bank_operation_id`. | [P] | architecture §5.3. |
+| BR-50 | Rút/chuyển ra NH: giữ chỗ (hold) số tiền khi tạo lệnh. Thất bại **chắc chắn** → giải phóng hold ngay. Kết quả không rõ → **giữ nguyên hold** cho tới khi tra cứu hoặc đối soát có kết luận. | [P] | erd §3.2 (dòng 3a–3c). |
 | BR-51 | Thanh toán QR: `SUCCEEDED` ngay khi ledger commit (ví là nguồn sự thật). Callback cho merchant được retry với backoff tối đa **24 giờ**; merchant có API tra cứu theo `order_id`. `(merchant_id, order_id)` là **unique**, nên một đơn hàng không thể bị thanh toán 2 lần. | [P] | Trả lời câu "merchant đã nhận nhưng ví chưa nhận callback". |
 | BR-52 | QR MVP chỉ là **QR động**: có số tiền cố định, `order_id`, hết hạn sau **15 phút**. App lấy thông tin merchant/đơn hàng **từ backend** theo mã trong QR, không tin nội dung QR. | [P] | |
 | BR-53 | Merchant phải là tổ chức đã ký hợp đồng (seed sẵn trong DB), trạng thái `ACTIVE`. | [P] | |
@@ -137,7 +138,7 @@ Ví tổ chức / hộ kinh doanh; ví cho người dưới 18 tuổi hoặc ng�
 | BR-61 | Từ chối/tạm dừng giao dịch khi nghi gian lận (theo AML rule hoặc bộ tiêu chí rủi ro) → ví `SUSPENDED` và tạo case cho vận hành. | [L] | TT40 Đ19, Đ28. |
 | BR-62 | **Đóng ví** theo yêu cầu: không còn giao dịch `PENDING`/hold; số dư phải rút hết về TK liên kết trước khi đóng. | [L]/[P] | TT40 Đ25 (hoàn trả số dư). |
 | BR-63 | Ví **không phát sinh giao dịch trong 12 tháng** → thông báo trước 30 ngày rồi đóng; số dư tự hoàn về TK liên kết. | [P] | Luật cho phép quy định trong thỏa thuận. |
-| BR-64 | Back-office **không** sửa số dư hoặc trạng thái giao dịch trực tiếp. Mọi điều chỉnh tài chính qua nghiệp vụ điều chỉnh, **maker–checker** (2 người khác nhau), bắt buộc ghi lý do. | [P] | planning §11. |
+| BR-64 | Back-office **không** sửa số dư hoặc trạng thái giao dịch trực tiếp. Mọi điều chỉnh tài chính qua nghiệp vụ điều chỉnh, **maker–checker** (2 người khác nhau), bắt buộc ghi lý do. | [P] | prd F-18. |
 
 ### H. Dữ liệu cá nhân, PCRT, lưu trữ
 
@@ -185,7 +186,7 @@ Ví tổ chức / hộ kinh doanh; ví cho người dưới 18 tuổi hoặc ng�
 4. **TT45/2025** (cấm thẻ tín dụng nạp ví): mới xác nhận qua nguồn thứ cấp.
 5. Các quy tắc **[P]** là đề xuất của tôi, bạn có thể đổi tùy ý, đặc biệt BR-01 (tuổi), BR-12, BR-28, BR-38, BR-60, BR-63.
 
-## 7. Truy vết checklist planning §3.3
+## 7. Truy vết các câu hỏi nghiệp vụ ban đầu (từ `planning.md` cũ)
 
 | Câu hỏi | Trả lời |
 |---|---|

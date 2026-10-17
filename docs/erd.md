@@ -1,7 +1,7 @@
 # ERD — Mô hình dữ liệu
 
 > Trạng thái: **DRAFT — chờ review** · Cập nhật: 2026-10-17
-> Liên quan: [planning.md](planning.md) · [scope.md](scope.md) (`BR-xx`) · [architecture.md](architecture.md) (§4 module, §9 kiến trúc dữ liệu)
+> Liên quan: [README](README.md) · [business-rules.md](business-rules.md) (`BR-xx`) · [architecture.md](architecture.md) (§4 module, §9 kiến trúc dữ liệu)
 
 ## 1. Quy ước
 
@@ -988,7 +988,7 @@ Index: `(resource_type, resource_id, occurred_at)`, `(actor_id, occurred_at)`.
 
 ### 4.14. `platform`
 
-**`platform.settings`** — tham số cấu hình nghiệp vụ (scope §5). Một chỗ duy nhất, các module đọc qua `platform/config`.
+**`platform.settings`** — tham số cấu hình nghiệp vụ (business-rules §5). Một chỗ duy nhất, các module đọc qua `platform/config`.
 
 | Cột | Kiểu | Ràng buộc | Ghi chú |
 |---|---|---|---|

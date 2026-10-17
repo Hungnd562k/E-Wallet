@@ -1,7 +1,7 @@
 # Architecture — E-Wallet Platform
 
 > Trạng thái: **DRAFT — chờ review** · Cập nhật: 2026-10-17
-> Liên quan: [planning.md](planning.md) · [scope.md](scope.md) (mã `BR-xx` tham chiếu tới scope)
+> Liên quan: [README](README.md) · [prd.md](prd.md) · [business-rules.md](business-rules.md) (mã `BR-xx`)
 
 ## 1. Mục tiêu & thuộc tính chất lượng
 
@@ -348,7 +348,7 @@ Nội dung QR **chỉ chứa** `qr_token` (ví dụ `ewallet://pay?t=<qr_token>`
 
 ### 7.3. wallet ↔ client (mobile, back-office)
 
-Kế thừa các nguyên tắc ở planning §8, bổ sung:
+Nguyên tắc chung (tiền là số nguyên, idempotency, mã lỗi chuẩn hóa, correlation id, OpenAPI là nguồn chuẩn), bổ sung:
 
 - Header bắt buộc: `Authorization`, `X-Device-Id`, `X-Request-Id`. Thêm `Idempotency-Key` cho mọi lệnh tạo giao dịch.
 - **Step-up flow** (BR-36, 40):
@@ -451,7 +451,7 @@ Monorepo:
 
 ```text
 E-Wallet/
-├── docs/                 # planning, scope, architecture, erd, money-flows, failure-scenarios
+├── docs/                 # README, prd, urd, business-rules, fsd/, architecture, erd, api/, failure-scenarios
 ├── wallet-core/          # Go — cmd/api, cmd/worker, internal/, migrations/, api/openapi.yaml (chuyển từ docs/api khi scaffold)
 ├── corebank/             # Java 21, Spring Boot 3, Gradle
 ├── merchant-sim/         # Go
@@ -517,9 +517,9 @@ Các kịch bản E2E sẽ được liệt kê trong `failure-scenarios.md`.
 
 ---
 
-## 14. Truy vết scope → kiến trúc
+## 14. Truy vết business rules → kiến trúc
 
-| Nhóm BR (scope.md) | Module / container chịu trách nhiệm |
+| Nhóm BR (business-rules.md) | Module / container chịu trách nhiệm |
 |---|---|
 | A. Khách hàng & mở ví (BR-01…08) | `identity`, `kyc`, `wallet`, MinIO, mock providers |
 | B. Liên kết ngân hàng (BR-10…14) | `banklink` ↔ corebank `/v1/accounts`, `/v1/links` |

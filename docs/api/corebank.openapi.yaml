@@ -18,7 +18,7 @@ info:
       `REJECTED` là kết luận cuối (`reason_code` bắt đầu bằng `REJECTED_`).
       `PROCESSING`, timeout, lỗi mạng, `5xx` ⇒ wallet coi là **chưa rõ** và phải tra cứu `GET /v1/operations/{client_operation_id}`.
     - Tiền: số nguyên `int64`, đơn vị đồng, `currency = VND`.
-    - Một instance mô phỏng **nhiều ngân hàng** qua `bank_code`. TK đảm bảo của công ty ví nằm ở bank `EWB` (scope BR-55).
+    - Một instance mô phỏng **nhiều ngân hàng** qua `bank_code`. TK đảm bảo của công ty ví nằm ở bank `EWB` (BR-55).
 
     ## Fault injection (chỉ profile `dev`/`test`)
     - Theo rule cấu hình qua `/dev/fault-rules`, hoặc header `X-Fault` trên từng request (chỉ chấp nhận từ client test).
@@ -32,13 +32,13 @@ security:
   - corebankHmac: []
 tags:
   - name: Accounts
-    description: Kiểm tra chủ sở hữu TK/thẻ (scope BR-10, BR-11)
+    description: Kiểm tra chủ sở hữu TK/thẻ (BR-10, BR-11)
   - name: Links
-    description: Liên kết TK/thẻ ghi nợ với ví (scope BR-10…14)
+    description: Liên kết TK/thẻ ghi nợ với ví (BR-10…14)
   - name: Operations
-    description: Lệnh tiền qua TK đảm bảo (scope BR-20…22, 49, 55)
+    description: Lệnh tiền qua TK đảm bảo (BR-20…22, 49, 55)
   - name: Safeguard
-    description: Số dư & sao kê TK đảm bảo cho đối soát (scope BR-56, 58)
+    description: Số dư & sao kê TK đảm bảo cho đối soát (BR-56, 58)
   - name: Dev
     description: Chỉ bật ở profile dev/test
 
