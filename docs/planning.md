@@ -553,7 +553,7 @@ Tạo trước khi code (trong `docs/`):
 - [x] `scope.md` — phạm vi MVP + quy tắc nghiệp vụ (draft, chờ review).
 - [x] `architecture.md` — ứng dụng, module, ranh giới dữ liệu (draft, chờ review).
 - [x] `erd.md` — mô hình dữ liệu & quan hệ (draft, chờ review).
-- [ ] `api-contract.yaml` — API contract của wallet-core và corebank.
+- [x] API contract (OpenAPI 3.1, draft, chờ review): [`api/wallet-core.openapi.yaml`](api/wallet-core.openapi.yaml), [`api/corebank.openapi.yaml`](api/corebank.openapi.yaml). Khi scaffold code sẽ chuyển vào `wallet-core/api/` và `corebank/`.
 - [ ] `money-flows.md` — sequence diagram + bút toán cho nạp, chuyển, rút, QR.
 - [ ] `failure-scenarios.md` — timeout, retry, duplicate request, race condition, lệch đối soát.
 

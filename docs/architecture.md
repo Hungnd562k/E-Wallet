@@ -359,7 +359,7 @@ Kế thừa các nguyên tắc ở planning §8, bổ sung:
 - Lỗi có định dạng thống nhất: `{ "error": "<CODE>", "message", "details", "request_id" }`. Mã lỗi nghiệp vụ map sang `4xx`, chỉ lỗi hệ thống mới là `5xx`.
 - API back-office nằm dưới `/admin/v1/*` và dùng token realm khác.
 
-Contract chi tiết nằm trong `api-contract.yaml`.
+Contract chi tiết (OpenAPI 3.1): [`api/wallet-core.openapi.yaml`](api/wallet-core.openapi.yaml) và [`api/corebank.openapi.yaml`](api/corebank.openapi.yaml).
 
 ---
 
@@ -452,7 +452,7 @@ Monorepo:
 ```text
 E-Wallet/
 ├── docs/                 # planning, scope, architecture, erd, money-flows, failure-scenarios
-├── wallet-core/          # Go — cmd/api, cmd/worker, internal/, migrations/, api/openapi.yaml
+├── wallet-core/          # Go — cmd/api, cmd/worker, internal/, migrations/, api/openapi.yaml (chuyển từ docs/api khi scaffold)
 ├── corebank/             # Java 21, Spring Boot 3, Gradle
 ├── merchant-sim/         # Go
 ├── app-mobile/           # Flutter

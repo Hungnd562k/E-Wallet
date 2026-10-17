@@ -1,0 +1,639 @@
+openapi: 3.1.0
+info:
+  title: Corebank (simulated) API
+  version: 0.1.0
+  summary: Ngân hàng giả lập phục vụ wallet-core — KHÔNG phải ngân hàng thật.
+  license:
+    name: Proprietary — project học tập, không dùng cho tiền thật
+    identifier: LicenseRef-Proprietary
+  description: |
+    Hợp đồng giữa **wallet-core** (client) và **corebank** (Java/Spring Boot) — xem `docs/architecture.md` §7.1.
+
+    ## Nguyên tắc
+    - **Xác thực service-to-service** bằng HMAC: mọi request mang `X-Client-Id`, `X-Timestamp` (RFC 3339, lệch tối đa ±5 phút)
+      và `X-Signature = hex(HMAC-SHA256(secret, METHOD + "\n" + PATH_WITH_QUERY + "\n" + X-Timestamp + "\n" + SHA256_HEX(body)))`.
+    - **Idempotency**: mọi lệnh tiền mang `client_operation_id` (= `bank_operation_id` của wallet, UUIDv7).
+      Gửi lại cùng id + cùng payload ⇒ trả **đúng kết quả cũ**, không thực hiện lại. Cùng id + payload khác ⇒ `409 OPERATION_ID_CONFLICT`.
+    - **Kết quả operation**: `status ∈ {SUCCEEDED, REJECTED, PROCESSING}`.
+      `REJECTED` là kết luận cuối (`reason_code` bắt đầu bằng `REJECTED_`).
+      `PROCESSING`, timeout, lỗi mạng, `5xx` ⇒ wallet coi là **chưa rõ** và phải tra cứu `GET /v1/operations/{client_operation_id}`.
+    - Tiền: số nguyên `int64`, đơn vị đồng, `currency = VND`.
+    - Một instance mô phỏng **nhiều ngân hàng** qua `bank_code`. TK đảm bảo của công ty ví nằm ở bank `EWB` (scope BR-55).
+
+    ## Fault injection (chỉ profile `dev`/`test`)
+    - Theo rule cấu hình qua `/dev/fault-rules`, hoặc header `X-Fault` trên từng request (chỉ chấp nhận từ client test).
+    - Giá trị `X-Fault`: `delay=<ms>` · `timeout` · `commit-then-drop` · `reject=<CODE>` · `processing=<n>` · `5xx`.
+  contact:
+    name: E-Wallet project
+servers:
+  - url: http://localhost:8081
+    description: Local (docker compose)
+security:
+  - corebankHmac: []
+tags:
+  - name: Accounts
+    description: Kiểm tra chủ sở hữu TK/thẻ (scope BR-10, BR-11)
+  - name: Links
+    description: Liên kết TK/thẻ ghi nợ với ví (scope BR-10…14)
+  - name: Operations
+    description: Lệnh tiền qua TK đảm bảo (scope BR-20…22, 49, 55)
+  - name: Safeguard
+    description: Số dư & sao kê TK đảm bảo cho đối soát (scope BR-56, 58)
+  - name: Dev
+    description: Chỉ bật ở profile dev/test
+
+paths:
+  /v1/accounts/verify-ownership:
+    post:
+      tags: [Accounts]
+      operationId: verifyAccountOwnership
+      summary: Kiểm tra TK/thẻ thuộc đúng chủ (họ tên + số CCCD)
+      description: Từ chối thẻ tín dụng (BR-11) và tài khoản chung.
+      x-br: [BR-10, BR-11]
+      parameters:
+        - $ref: '#/components/parameters/Fault'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VerifyOwnershipRequest' }
+      responses:
+        '200':
+          description: Kết quả kiểm tra
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/VerifyOwnershipResult' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '503': { $ref: '#/components/responses/Unavailable' }
+
+  /v1/links:
+    post:
+      tags: [Links]
+      operationId: createLink
+      summary: Khởi tạo liên kết, corebank gửi OTP (mock) tới SĐT đăng ký tại ngân hàng
+      x-br: [BR-10, BR-14]
+      parameters:
+        - $ref: '#/components/parameters/Fault'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateLinkRequest' }
+      responses:
+        '201':
+          description: Đã gửi OTP
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Link' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '422': { $ref: '#/components/responses/BusinessRejected' }
+        '503': { $ref: '#/components/responses/Unavailable' }
+
+  /v1/links/{link_id}/confirm:
+    post:
+      tags: [Links]
+      operationId: confirmLink
+      summary: Xác nhận OTP, kích hoạt liên kết và trả link_token
+      x-br: [BR-14]
+      parameters:
+        - $ref: '#/components/parameters/LinkId'
+        - $ref: '#/components/parameters/Fault'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [otp]
+              properties:
+                otp: { type: string, pattern: '^[0-9]{6}$' }
+      responses:
+        '200':
+          description: Liên kết ACTIVE
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Link' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/BusinessRejected' }
+
+  /v1/links/{link_id}:
+    delete:
+      tags: [Links]
+      operationId: revokeLink
+      summary: Hủy liên kết
+      x-br: [BR-13]
+      parameters:
+        - $ref: '#/components/parameters/LinkId'
+      responses:
+        '204': { description: Đã hủy }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /v1/operations/debit-to-safeguard:
+    post:
+      tags: [Operations]
+      operationId: debitToSafeguard
+      summary: Nạp tiền — ghi nợ TK khách hàng, ghi có TK đảm bảo
+      x-br: [BR-20, BR-49, BR-55]
+      parameters:
+        - $ref: '#/components/parameters/Fault'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DebitToSafeguardRequest' }
+            example:
+              client_operation_id: 0192a3b4-5c6d-7e8f-9012-3456789abcde
+              link_token: lt_9f8e7d6c5b4a
+              amount: 500000
+              currency: VND
+              description: Nap tien vi E-Wallet
+      responses:
+        '200': { $ref: '#/components/responses/OperationResult' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/OperationConflict' }
+        '503': { $ref: '#/components/responses/Unavailable' }
+
+  /v1/operations/credit-from-safeguard:
+    post:
+      tags: [Operations]
+      operationId: creditFromSafeguard
+      summary: Rút tiền — ghi nợ TK đảm bảo, ghi có TK liên kết của chủ ví
+      x-br: [BR-21, BR-50, BR-55]
+      parameters:
+        - $ref: '#/components/parameters/Fault'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreditFromSafeguardRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/OperationResult' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/OperationConflict' }
+        '503': { $ref: '#/components/responses/Unavailable' }
+
+  /v1/operations/interbank-transfer:
+    post:
+      tags: [Operations]
+      operationId: interbankTransfer
+      summary: Chuyển từ TK đảm bảo tới TK bất kỳ (mạng liên ngân hàng giả lập)
+      description: Bắt buộc gửi kèm thông tin tối thiểu của người gửi (BR-22).
+      x-br: [BR-22, BR-50, BR-55]
+      parameters:
+        - $ref: '#/components/parameters/Fault'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InterbankTransferRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/OperationResult' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/OperationConflict' }
+        '503': { $ref: '#/components/responses/Unavailable' }
+
+  /v1/operations/{client_operation_id}:
+    get:
+      tags: [Operations]
+      operationId: getOperation
+      summary: Tra cứu trạng thái operation theo id của wallet
+      x-br: [BR-46, BR-49]
+      parameters:
+        - name: client_operation_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '#/components/parameters/Fault'
+      responses:
+        '200':
+          description: Operation đã tồn tại
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Operation' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: Corebank chưa từng nhận operation này — wallet có thể gửi lại lệnh với CÙNG id
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /v1/safeguard/balance:
+    get:
+      tags: [Safeguard]
+      operationId: getSafeguardBalance
+      summary: Số dư hiện tại của TK đảm bảo
+      x-br: [BR-56]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SafeguardBalance' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /v1/statements:
+    get:
+      tags: [Safeguard]
+      operationId: getStatement
+      summary: Sao kê TK đảm bảo theo ngày nghiệp vụ (giờ VN) — phục vụ đối soát T+1
+      x-br: [BR-58]
+      parameters:
+        - name: account
+          in: query
+          required: true
+          schema: { type: string, enum: [safeguard] }
+        - name: date
+          in: query
+          required: true
+          schema: { type: string, format: date }
+        - name: cursor
+          in: query
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 1000, default: 500 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Statement' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /dev/fault-rules:
+    get:
+      tags: [Dev]
+      operationId: listFaultRules
+      summary: Liệt kê fault rule (dev/test)
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/FaultRule' }
+        '403': { description: 'Endpoint chỉ bật ở profile dev/test; profile khác trả 403' }
+    post:
+      tags: [Dev]
+      operationId: createFaultRule
+      summary: Tạo fault rule (dev/test)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FaultRuleInput' }
+            example:
+              endpoint: debit-to-safeguard
+              match: { amount: 777000 }
+              fault: commit-then-drop
+              remaining: 1
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FaultRule' }
+        '403': { description: 'Endpoint chỉ bật ở profile dev/test; profile khác trả 403' }
+    delete:
+      tags: [Dev]
+      operationId: clearFaultRules
+      summary: Xóa toàn bộ fault rule (dev/test)
+      security: []
+      responses:
+        '204': { description: Đã xóa }
+
+        '403': { description: 'Endpoint chỉ bật ở profile dev/test; profile khác trả 403' }
+  /dev/accounts:
+    post:
+      tags: [Dev]
+      operationId: createTestAccount
+      summary: Tạo khách hàng + TK test (dev/test)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [bank_code, full_name, id_number]
+              properties:
+                bank_code: { type: string, example: VCB }
+                full_name: { type: string, example: NGUYEN VAN A }
+                id_number: { type: string, pattern: '^[0-9]{12}$' }
+                date_of_birth: { type: string, format: date }
+                phone: { type: string }
+                initial_balance: { type: integer, format: int64, minimum: 0, default: 0 }
+                with_debit_card: { type: boolean, default: true }
+                with_credit_card: { type: boolean, default: false }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  account_id: { type: string, format: uuid }
+                  account_number: { type: string }
+                  debit_card_pan: { type: [string, 'null'] }
+                  credit_card_pan: { type: [string, 'null'] }
+
+        '403': { description: 'Endpoint chỉ bật ở profile dev/test; profile khác trả 403' }
+  /dev/accounts/{account_id}/deposit:
+    post:
+      tags: [Dev]
+      operationId: depositTestAccount
+      summary: Nạp tiền thẳng vào TK test (dev/test)
+      security: []
+      parameters:
+        - name: account_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount]
+              properties:
+                amount: { type: integer, format: int64, minimum: 1 }
+      responses:
+        '200': { description: OK }
+
+        '403': { description: 'Endpoint chỉ bật ở profile dev/test; profile khác trả 403' }
+components:
+  securitySchemes:
+    corebankHmac:
+      type: apiKey
+      in: header
+      name: X-Signature
+      description: |
+        Kèm `X-Client-Id` và `X-Timestamp`. Xem cách ký ở phần mô tả API.
+
+  parameters:
+    LinkId:
+      name: link_id
+      in: path
+      required: true
+      schema: { type: string }
+    Fault:
+      name: X-Fault
+      in: header
+      required: false
+      description: Chỉ dev/test. Ví dụ `timeout`, `commit-then-drop`, `delay=3000`, `reject=INSUFFICIENT_FUNDS`, `processing=2`, `5xx`.
+      schema: { type: string }
+
+  responses:
+    OperationResult:
+      description: |
+        Kết quả operation (lần đầu hoặc phát lại do idempotency).
+        `status = PROCESSING` ⇒ wallet tra cứu lại sau.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Operation' }
+          examples:
+            succeeded:
+              value:
+                client_operation_id: 0192a3b4-5c6d-7e8f-9012-3456789abcde
+                corebank_ref: CB20261017000123
+                type: DEBIT_TO_SAFEGUARD
+                status: SUCCEEDED
+                amount: 500000
+                currency: VND
+                created_at: '2026-10-17T03:15:00Z'
+                completed_at: '2026-10-17T03:15:01Z'
+            rejected:
+              value:
+                client_operation_id: 0192a3b4-5c6d-7e8f-9012-3456789abcde
+                type: DEBIT_TO_SAFEGUARD
+                status: REJECTED
+                reason_code: REJECTED_INSUFFICIENT_FUNDS
+                amount: 500000
+                currency: VND
+                created_at: '2026-10-17T03:15:00Z'
+    BadRequest:
+      description: Request sai định dạng
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unauthorized:
+      description: Sai chữ ký / timestamp quá hạn
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Không tồn tại
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    BusinessRejected:
+      description: Từ chối nghiệp vụ (ví dụ sai OTP, chủ TK không khớp)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    OperationConflict:
+      description: Cùng `client_operation_id` nhưng payload khác (`OPERATION_ID_CONFLICT`)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unavailable:
+      description: Corebank tạm không phục vụ — kết quả CHƯA RÕ với lệnh tiền
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+
+  schemas:
+    Money:
+      type: integer
+      format: int64
+      minimum: 1
+      description: Số tiền theo đồng (VND không có phần lẻ)
+    Currency:
+      type: string
+      enum: [VND]
+      default: VND
+
+    Error:
+      type: object
+      required: [error, message]
+      properties:
+        error:
+          type: string
+          description: Mã lỗi máy đọc được
+          examples: [INVALID_SIGNATURE, OPERATION_ID_CONFLICT, LINK_NOT_FOUND, OTP_INVALID]
+        message: { type: string }
+        details: { type: object, additionalProperties: true }
+        request_id: { type: string }
+
+    VerifyOwnershipRequest:
+      type: object
+      required: [bank_code, source_type, number, holder_name, id_number]
+      properties:
+        bank_code: { type: string, example: VCB }
+        source_type: { type: string, enum: [ACCOUNT, DEBIT_CARD, CREDIT_CARD] }
+        number: { type: string, description: Số TK hoặc số thẻ }
+        holder_name: { type: string, description: Họ tên in hoa không dấu theo CCCD }
+        id_number: { type: string, pattern: '^[0-9]{12}$' }
+    VerifyOwnershipResult:
+      type: object
+      required: [matched]
+      properties:
+        matched: { type: boolean }
+        reason_code:
+          type: [string, 'null']
+          enum: [NAME_MISMATCH, ID_MISMATCH, ACCOUNT_NOT_FOUND, ACCOUNT_CLOSED, CREDIT_CARD_NOT_ALLOWED, JOINT_ACCOUNT_NOT_ALLOWED, null]
+        holder_name: { type: string }
+        number_masked: { type: string, example: '****1234' }
+
+    CreateLinkRequest:
+      type: object
+      required: [bank_code, source_type, number, holder_name, id_number, wallet_customer_ref]
+      properties:
+        bank_code: { type: string }
+        source_type: { type: string, enum: [ACCOUNT, DEBIT_CARD] }
+        number: { type: string }
+        holder_name: { type: string }
+        id_number: { type: string, pattern: '^[0-9]{12}$' }
+        wallet_customer_ref:
+          type: string
+          format: uuid
+          description: customer_id phía wallet (để corebank đối chiếu, không lộ dữ liệu khác)
+    Link:
+      type: object
+      required: [link_id, status]
+      properties:
+        link_id: { type: string }
+        status: { type: string, enum: [OTP_SENT, ACTIVE, REVOKED] }
+        link_token:
+          type: string
+          description: Chỉ trả khi ACTIVE. Wallet lưu mã hóa, dùng cho debit-to-safeguard.
+        number_masked: { type: string }
+        otp_expires_at: { type: string, format: date-time }
+
+    DebitToSafeguardRequest:
+      type: object
+      required: [client_operation_id, link_token, amount, currency]
+      properties:
+        client_operation_id: { type: string, format: uuid }
+        link_token: { type: string }
+        amount: { $ref: '#/components/schemas/Money' }
+        currency: { $ref: '#/components/schemas/Currency' }
+        description: { type: string, maxLength: 140 }
+    CreditFromSafeguardRequest:
+      type: object
+      required: [client_operation_id, link_token, amount, currency]
+      properties:
+        client_operation_id: { type: string, format: uuid }
+        link_token: { type: string, description: Chỉ chuyển về TK đã liên kết (BR-21) }
+        amount: { $ref: '#/components/schemas/Money' }
+        currency: { $ref: '#/components/schemas/Currency' }
+        description: { type: string, maxLength: 140 }
+    InterbankTransferRequest:
+      type: object
+      required: [client_operation_id, dest_bank_code, dest_account_number, amount, currency, sender]
+      properties:
+        client_operation_id: { type: string, format: uuid }
+        dest_bank_code: { type: string }
+        dest_account_number: { type: string }
+        dest_holder_name: { type: string, description: 'Nếu gửi, corebank kiểm tra khớp' }
+        amount: { $ref: '#/components/schemas/Money' }
+        currency: { $ref: '#/components/schemas/Currency' }
+        description: { type: string, maxLength: 140 }
+        sender:
+          type: object
+          description: Thông tin tối thiểu của người gửi (BR-22)
+          required: [name, wallet_ref]
+          properties:
+            name: { type: string }
+            wallet_ref: { type: string, description: Mã ví public (wal_…) }
+
+    Operation:
+      type: object
+      required: [client_operation_id, type, status, amount, currency, created_at]
+      properties:
+        client_operation_id: { type: string, format: uuid }
+        corebank_ref: { type: [string, 'null'] }
+        type: { type: string, enum: [DEBIT_TO_SAFEGUARD, CREDIT_FROM_SAFEGUARD, INTERBANK_TRANSFER] }
+        status: { type: string, enum: [SUCCEEDED, REJECTED, PROCESSING] }
+        reason_code:
+          type: [string, 'null']
+          description: '`REJECTED_*` (kết luận cuối) hoặc `RETRYABLE_*` (đi kèm PROCESSING)'
+          examples:
+            - REJECTED_INSUFFICIENT_FUNDS
+            - REJECTED_LINK_REVOKED
+            - REJECTED_ACCOUNT_CLOSED
+            - REJECTED_DEST_ACCOUNT_NOT_FOUND
+            - REJECTED_NAME_MISMATCH
+            - RETRYABLE_NETWORK_BUSY
+        amount: { $ref: '#/components/schemas/Money' }
+        currency: { $ref: '#/components/schemas/Currency' }
+        created_at: { type: string, format: date-time }
+        completed_at: { type: [string, 'null'], format: date-time }
+
+    SafeguardBalance:
+      type: object
+      required: [bank_code, account_number, balance, currency, as_of]
+      properties:
+        bank_code: { type: string, example: EWB }
+        account_number: { type: string }
+        balance: { type: integer, format: int64 }
+        currency: { $ref: '#/components/schemas/Currency' }
+        as_of: { type: string, format: date-time }
+
+    Statement:
+      type: object
+      required: [date, opening_balance, closing_balance, lines]
+      properties:
+        date: { type: string, format: date }
+        opening_balance: { type: integer, format: int64 }
+        closing_balance: { type: integer, format: int64 }
+        lines:
+          type: array
+          items:
+            type: object
+            required: [seq, client_operation_id, direction, amount, balance_after, posted_at]
+            properties:
+              seq: { type: integer, format: int64 }
+              client_operation_id: { type: string, format: uuid }
+              corebank_ref: { type: string }
+              type: { type: string, enum: [DEBIT_TO_SAFEGUARD, CREDIT_FROM_SAFEGUARD, INTERBANK_TRANSFER] }
+              direction: { type: string, enum: [D, C], description: Theo góc nhìn TK đảm bảo }
+              amount: { type: integer, format: int64 }
+              balance_after: { type: integer, format: int64 }
+              posted_at: { type: string, format: date-time }
+        next_cursor: { type: [string, 'null'] }
+
+    FaultRuleInput:
+      type: object
+      required: [endpoint, fault]
+      properties:
+        endpoint:
+          type: string
+          enum: [verify-ownership, links, links-confirm, debit-to-safeguard, credit-from-safeguard, interbank-transfer, get-operation, '*']
+        match:
+          type: object
+          additionalProperties: true
+          description: 'Điều kiện khớp trên body, ví dụ `{"amount": 777000}`'
+        fault: { type: string, enum: [delay, timeout, commit-then-drop, reject, processing, 5xx] }
+        param: { type: string, description: 'delay: ms · reject: reason code · processing: số lần' }
+        remaining: { type: [integer, 'null'], description: Số lần còn áp dụng; null = vô hạn }
+        enabled: { type: boolean, default: true }
+    FaultRule:
+      allOf:
+        - $ref: '#/components/schemas/FaultRuleInput'
+        - type: object
+          required: [id]
+          properties:
+            id: { type: string, format: uuid }
