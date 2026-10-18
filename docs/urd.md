@@ -1,6 +1,6 @@
 # URD — User Requirements
 
-> Trạng thái: **DRAFT — chờ review** · Cập nhật: 2026-10-17
+> Trạng thái: **REVIEWED — Đã review** · Cập nhật: 2026-10-18
 > Liên quan: [README](README.md) · [prd.md](prd.md) (`F-xx`) · [business-rules.md](business-rules.md) (`BR-xx`) · [fsd/](fsd/) (`UC-xx`)
 
 Tài liệu này mô tả **người dùng cần làm gì và thế nào là đạt**, từ góc nhìn người dùng, không mô tả cách hệ thống xây dựng.
@@ -303,3 +303,7 @@ Cột **F** là tính năng trong PRD. Cột **BR** là quy tắc chính áp d�
 | P7 Merchant | US-60…63 |
 
 Ma trận đầy đủ US ↔ UC ↔ API sẽ nằm trong `fsd/README.md`.
+
+## 5. Lịch sử
+
+- 2026-10-18: Review `urd.md` done

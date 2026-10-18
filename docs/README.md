@@ -27,12 +27,12 @@ flowchart TD
 
 | Tài liệu | Loại (chuẩn BA) | Trả lời câu hỏi | Người đọc chính | Trạng thái |
 |---|---|---|---|---|
-| [prd.md](prd.md) | **PRD** (gộp BRD) | Sản phẩm giải quyết vấn đề gì, gồm tính năng nào, ưu tiên ra sao, khi nào xong, đo thành công thế nào | Tất cả | Draft |
-| [urd.md](urd.md) | **URD** | Từng nhóm người dùng cần làm gì; thế nào là đạt | BA, dev, tester | Draft |
-| [business-rules.md](business-rules.md) | Business rules catalogue (một phần của SRS) | Quy tắc nghiệp vụ nào bắt buộc, căn cứ pháp lý nào | BA, dev | Draft |
-| [fsd/](fsd/) | **FSD / SRS** | Mỗi chức năng chạy chi tiết ra sao: luồng chính/thay thế/ngoại lệ, màn hình, validation, thông báo | Dev, tester | **Chưa viết** |
-| [architecture.md](architecture.md) | TDD / SAD | Hệ thống được chia thành những thành phần nào, giao tiếp ra sao | Dev | Draft |
-| [erd.md](erd.md) | TDD — mô hình dữ liệu | Dữ liệu lưu thế nào, ràng buộc gì, bút toán ra sao | Dev | Draft |
+| [prd.md](prd.md) | **PRD** (gộp BRD) | Sản phẩm giải quyết vấn đề gì, gồm tính năng nào, ưu tiên ra sao, khi nào xong, đo thành công thế nào | Tất cả | Reviewed |
+| [urd.md](urd.md) | **URD** | Từng nhóm người dùng cần làm gì; thế nào là đạt | BA, dev, tester | Reviewed |
+| [business-rules.md](business-rules.md) | Business rules catalogue (một phần của SRS) | Quy tắc nghiệp vụ nào bắt buộc, căn cứ pháp lý nào | BA, dev | Reviewed |
+| [fsd/](fsd/) | **FSD / SRS** | Mỗi chức năng chạy chi tiết ra sao: luồng chính/thay thế/ngoại lệ, màn hình, validation, thông báo | Dev, tester | Draft — phạm vi M0 |
+| [architecture.md](architecture.md) | TDD / SAD | Hệ thống được chia thành những thành phần nào, giao tiếp ra sao | Dev | Reviewed |
+| [erd.md](erd.md) | TDD — mô hình dữ liệu | Dữ liệu lưu thế nào, ràng buộc gì, bút toán ra sao | Dev | Reviewed |
 | [api/wallet-core.openapi.yaml](api/wallet-core.openapi.yaml), [api/corebank.openapi.yaml](api/corebank.openapi.yaml) | Interface spec | Hợp đồng API giữa các hệ thống | Dev (BE, FE, mobile) | Draft, lint sạch |
 | `failure-scenarios.md` | Test spec | Các kịch bản lỗi và cách kiểm chứng | Dev, tester | Chưa viết |
 | [Q&A.md](Q&A.md) | Ghi chú cá nhân | Giải thích thuật ngữ | — | — |
@@ -48,13 +48,15 @@ flowchart TD
 | `US-xx` | User story | urd.md §2 |
 | `UR-NF-xx` | Yêu cầu phi chức năng (người dùng) | urd.md §3 |
 | `BR-xx` | Quy tắc nghiệp vụ, nhãn **[L]** luật / **[P]** quyết định sản phẩm | business-rules.md §4 |
-| `UC-xx` | Use case | fsd/*.md |
+| `UC-<file>.<nn>` | Use case, ví dụ `UC-04.01` | fsd/*.md |
+| `S-<file>.<n>` | Màn hình, ví dụ `S-04.3` | fsd/*.md |
+| `CF-xx` | Hành vi dùng chung của mọi use case | fsd/README.md §4 |
 | `ADR-xx` | Quyết định kiến trúc | architecture.md §13 |
 | `TC-xx` | Kịch bản kiểm thử | failure-scenarios.md |
 
 Chuỗi truy vết: **Persona → US → F → UC → BR → API `operationId` / bảng ERD → TC**.
 
-Ví dụ: P1 Lan → US-21 chuyển ví–ví → F-05 → UC (fsd/04) → BR-24, 25, 29, 36 → `createTransfer`, `ledger.entries`, `limits.usage` → TC chuyển song song.
+Ví dụ: P1 Lan → US-21 chuyển ví–ví → F-05 → UC-04.01 → BR-24, 25, 29, 36 → `createTransfer`, `ledger.entries`, `limits.usage` → TC chuyển song song.
 
 ## 3. Quy ước viết
 

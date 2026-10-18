@@ -1,6 +1,6 @@
 # PRD — E-Wallet Platform
 
-> Trạng thái: **DRAFT — chờ review** · Cập nhật: 2026-10-17
+> Trạng thái: **REVIEWED — Đã review** · Cập nhật: 2026-10-18
 > Đổi tên từ `planning.md`. Các phần kỹ thuật trước đây nằm trong file này đã chuyển sang [architecture.md](architecture.md), [erd.md](erd.md), [api/](api/).
 > Liên quan: [README](README.md) · [urd.md](urd.md) (`US-xx`) · [business-rules.md](business-rules.md) (`BR-xx`) · [fsd/](fsd/) (`UC-xx`)
 
@@ -166,3 +166,4 @@ Xây theo **lát cắt nghiệp vụ**, ưu tiên nền tảng tài chính. Th�
 - Thảo luận gốc: https://chatgpt.com/share/6ad0fca4-bad0-83ec-a5b8-d8c4a680fca3
 - 2026-10-15: bản `planning.md` đầu tiên (gồm cả thiết kế kỹ thuật).
 - 2026-10-17: tách thành PRD; phần kỹ thuật chuyển sang architecture / erd / api; quy tắc nghiệp vụ ở `business-rules.md` (đổi tên từ `scope.md`).
+- 2026-10-18: Review `prd.md` done

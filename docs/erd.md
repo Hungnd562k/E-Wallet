@@ -1,6 +1,6 @@
 # ERD — Mô hình dữ liệu
 
-> Trạng thái: **DRAFT — chờ review** · Cập nhật: 2026-10-17
+> Trạng thái: **REVIEWED — Đã review** · Cập nhật: 2026-10-17
 > Liên quan: [README](README.md) · [business-rules.md](business-rules.md) (`BR-xx`) · [architecture.md](architecture.md) (§4 module, §9 kiến trúc dữ liệu)
 
 ## 1. Quy ước
@@ -1235,3 +1235,7 @@ Theo BR-73. Job `platform.cleanup` và `kyc.purge` thực hiện.
 | BR-70 | `identity.consents` |
 | BR-71 | Các cột `_enc` / `_hash`, quyền trên `audit` |
 | BR-73 | §8 |
+
+## 10. Lịch sử cập nhật
+
+- 2026-10-18: Review `erd.md` done

@@ -1,6 +1,6 @@
 # Business Rules — E-Wallet MVP
 
-> Trạng thái: **DRAFT — chờ review** · Cập nhật: 2026-10-16
+> Trạng thái: **REVIEWED — Đã review** · Cập nhật: 2026-10-16
 > Đổi tên từ `scope.md`. Liên quan: [README](README.md) · [prd.md](prd.md) · [urd.md](urd.md) · [fsd/](fsd/)
 
 ## 1. Mục đích & disclaimer
@@ -199,3 +199,7 @@ Ví tổ chức / hộ kinh doanh; ví cho người dưới 18 tuổi hoặc ng�
 | Hủy sau khi ghi nợ? | Không — BR-47, BR-48 |
 | Ghi nợ nhưng chưa ghi có? | BR-49, BR-58 |
 | Phí hạch toán vào đâu? | Miễn phí MVP, tài khoản `fee_revenue` — BR-30 |
+
+## 8. Lịch sử
+
+- 2026-10-18: Review `business-rules.md` done

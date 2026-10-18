@@ -529,3 +529,7 @@ Các kịch bản E2E sẽ được liệt kê trong `failure-scenarios.md`.
 | F. TK đảm bảo & đối soát (BR-55…58) | corebank (TK đảm bảo), `ledger.bank_settlement`, `reconciliation`, scheduler `recon.daily` |
 | G. Vận hành & khiếu nại (BR-60…64) | `dispute`, `risk`, `wallet`, `reconciliation`, `backoffice`, `audit` |
 | H. Dữ liệu cá nhân & PCRT (BR-70…74) | `identity` (consent), `platform/crypto`, `platform/observability` (redaction), `audit`, `risk` |
+
+## 15. Lịch sử
+
+- 2026-10-18: Review `architecture.md` done
