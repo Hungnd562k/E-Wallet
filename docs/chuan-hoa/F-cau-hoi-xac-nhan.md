@@ -1,6 +1,6 @@
 # F. Danh sách câu hỏi cần xác nhận
 
-> Trạng thái: **MỞ** · Lập: 2026-10-21 · Người trả lời: chủ dự án
+> Trạng thái: **MỞ — đã trả lời 4/31** (Q-01, Q-02, Q-06, Q-07) · Lập: 2026-10-21 · Cập nhật: 2026-10-21 · Người trả lời: chủ dự án
 > Liên quan: [README](README.md) · [D. Vấn đề](D-bao-cao-van-de.md) · [G. Giả định & đề xuất](G-gia-dinh-de-xuat.md)
 
 Mỗi câu hỏi gắn với vấn đề ở [D](D-bao-cao-van-de.md), nêu các phương án đã thấy trong nguồn và phương án gợi ý [ĐỀ XUẤT]. Gợi ý **không** phải quyết định: tài liệu nguồn chỉ được sửa sau khi có câu trả lời.
@@ -51,6 +51,8 @@ Cột **Ảnh hưởng nghiệp vụ** = **Có** nghĩa là câu trả lời có
 
 Theo ưu tiên: P1 = 12 · P2 = 11 · P3 = 8. Có ảnh hưởng nghiệp vụ: 18/31.
 
+Đã trả lời: Q-01, Q-02, Q-06, Q-07 (chủ dự án, 2026-10-21). Còn mở 8 câu P1: Q-04, Q-05, Q-12, Q-14, Q-19, Q-24, Q-30, Q-31.
+
 ## 2. Chi tiết
 
 ### Q-01 — Lỗi nghiệp vụ có được lưu theo `Idempotency-Key`? (ISS-01)
@@ -59,13 +61,17 @@ architecture §5.2 nói key "không bị chiếm" khi lỗi; CF-04, erd §4.7, O
 
 - (a) Lưu lỗi nghiệp vụ `422`; không lưu `401/423/409/429/5xx` (như CF-04). [ĐỀ XUẤT] → sửa câu trong architecture §5.2.
 - (b) Không lưu lỗi nào (như architecture §5.2) → phải sửa CF-04, AC-7 UC-04.01, erd §4.7, OpenAPI và mã.
-- Dùng (a) mặc định nếu như luồng phù hợp, tôi chưa lm tới đoạn đó nên cũng chưa hiểu hết luồng đó chi tiết như nào, nếu trong tương lai phát sinh mâu thuẫn sẽ sửa đổi sau.
+**Trả lời** [ĐÃ XÁC NHẬN] (chủ dự án, 2026-10-21): chọn (a). Nguyên văn: "Dùng (a) mặc định nếu như luồng phù hợp, tôi chưa lm tới đoạn đó nên cũng chưa hiểu hết luồng đó chi tiết như nào, nếu trong tương lai phát sinh mâu thuẫn sẽ sửa đổi sau."
+
+**Đã áp dụng**: CHG-04. Có thể xem lại khi triển khai tới luồng này.
 
 ### Q-02 — Thứ tự kiểm tra của lệnh tạo giao dịch (ISS-02)
 
 - (a) Theo fsd/04: idempotency → PIN → khoảng số tiền → step-up → khóa ví → trạng thái → hạn mức → bút toán. [ĐỀ XUẤT] → cập nhật sequence architecture §5.2.
 - (b) Theo architecture §5.2: xác thực (PIN/step-up) trước rồi mới mở transaction và idempotency → sửa bảng ở fsd/04 và UC-04.02.
-- Dùng (a)
+**Trả lời** [ĐÃ XÁC NHẬN] (chủ dự án, 2026-10-21): chọn (a).
+
+**Đã áp dụng**: CHG-05.
 
 ### Q-03 — `back-office-web` M3 hay M4? (ISS-03)
 
@@ -88,17 +94,17 @@ prd §9, F-20 và fsd/09 nói M4; architecture §3, §11 nói M3. [ĐỀ XUẤT]
 - (a) Merge `master` vào `main` và dùng `main` làm nhánh chính. [ĐỀ XUẤT]
 - (b) Đổi nhánh mặc định của repo sang `master`.
 - (c) Giữ nguyên.
-- Tạo và merge Pull request vào nhánh main, sau đó discard master đi
+**Trả lời** [ĐÃ XÁC NHẬN] (chủ dự án, 2026-10-21): như (a). Nguyên văn: "Tạo và merge Pull request vào nhánh main, sau đó discard master đi".
 
-PR của lần chuẩn hóa này được mở **vào `master`** để không trộn với quyết định này.
+**Đã áp dụng**: CHG-03. Hai nhánh không có lịch sử chung, nên PR gộp `main` vào nhánh làm việc rồi mở vào `main`. Xóa nhánh `master` do chủ dự án làm sau khi PR được merge.
 
 ### Q-07 — Nguồn chuẩn của OpenAPI (ISS-36)
 
 - (a) `E-Wallet/docs/api/` là nguồn chuẩn; wallet-core giữ bản sao và có bước kiểm tra `diff` trong CI. [ĐỀ XUẤT]
 - (b) `E-Wallet-Wallet-Core/api/openapi.yaml` là nguồn chuẩn (như architecture §11 dự kiến); docs chỉ trỏ link.
-- Dùng (b)
+**Trả lời** [ĐÃ XÁC NHẬN] (chủ dự án, 2026-10-21): chọn (b).
 
-Dù chọn bên nào, bản sao hiện tại đang thiếu thay đổi của commit `SCRUM-70`.
+**Đã áp dụng**: CHG-06, CHG-07. Bản trong wallet-core được đồng bộ với bản mới nhất của docs (gồm thay đổi của commit `SCRUM-70`) trước khi bản ở docs bị xóa.
 
 ### Q-08 — Viết lại BR-06 và BR-45 (ISS-07, ISS-08)
 

@@ -30,7 +30,7 @@ Thứ tự đọc giữ như docs/README: **vì sao → cho ai → làm gì → 
 | 6 | `docs/fsd/01, 02, 03, 05, 06, 08` | FSD M1–M4 | System / software requirements | **Chưa** | — | Viết theo template fsd/README §3; ưu tiên 02, 03, 05 | ISS-25 |
 | 7 | `docs/architecture.md` | SAD / TDD | Architecture description | Có | DRAFT hay REVIEWED? | ADR polyrepo, Go version, back-office milestone, §5.2 | ISS-02–06, 13 |
 | 8 | `docs/erd.md` | TDD — dữ liệu | — | Có | REVIEWED (ngày đầu file lệch) | Không cần sửa nội dung; là chuẩn tham chiếu cho tên gọi | ISS-04 |
-| 9 | `docs/api/wallet-core.openapi.yaml`, `corebank.openapi.yaml` | Interface spec | Interface requirements | Có | Draft, "lint sạch" | Chốt nguồn chuẩn; `x-br` của BR-28 | ISS-15, 36 |
+| 9 | wallet-core `api/openapi.yaml` (repo `E-Wallet-Wallet-Core`, nguồn chuẩn từ 2026-10-21), `docs/api/corebank.openapi.yaml` | Interface spec | Interface requirements | Có | Draft, "lint sạch" | `x-br` của BR-28 | ISS-15 |
 | 10 | `docs/failure-scenarios.md` | Test spec (TC-xx) | Verification | **Chưa** | — | Viết theo mẫu §5.3 | ISS-24 |
 | 11 | `docs/glossary.md` | Thuật ngữ | Definitions | **Chưa** (bản nháp ở §6) | — | Tạo từ §6, thay `Q&A.md` | ISS-29 |
 | 12 | `docs/runbooks/` | Runbook vận hành | — | **Chưa** | — | Ít nhất runbook BR-72 | ISS-30 |

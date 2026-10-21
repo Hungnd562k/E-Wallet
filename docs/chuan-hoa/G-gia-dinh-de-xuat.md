@@ -32,8 +32,8 @@ Các giả định dưới đây là của **người thực hiện chuẩn hóa
 | DX-02 | Dùng bộ trạng thái thống nhất: `DRAFT` → `IN REVIEW` → `REVIEWED` → `APPROVED`, thêm `SUPERSEDED`. | ISS-04 | Nhỏ |
 | DX-03 | Đồng bộ dòng trạng thái đầu file với lịch sử cuối file và bảng docs/README §1 (sau khi có câu trả lời Q-04). | ISS-04 | Nhỏ |
 | DX-04 | Tạo `docs/glossary.md` từ bản nháp [B §6](B-bo-tai-lieu-chuan-hoa.md#6-bảng-thuật-ngữ); trả lời 3 câu trong `Q&A.md` bằng link sang glossary. | ISS-29 | Nhỏ |
-| DX-05 | Sửa các tham chiếu lỗi thời trong wallet-core: `scope.md` → `business-rules.md` ở CLAUDE.md; đồng bộ `api/openapi.yaml` với bản gốc. | ISS-35, ISS-36 | Nhỏ |
-| DX-06 | Thêm bước CI ở wallet-core so sánh `api/openapi.yaml` với bản ở repo docs (theo Q-07). | ISS-36 | Nhỏ |
+| DX-05 | Sửa các tham chiếu lỗi thời trong wallet-core: `scope.md` → `business-rules.md` ở CLAUDE.md; đồng bộ `api/openapi.yaml` với bản gốc. **Đã làm** (CHG-06, 07). | ISS-35, ISS-36 | Nhỏ |
+| DX-06 | ~~Thêm bước CI ở wallet-core so sánh `api/openapi.yaml` với bản ở repo docs (theo Q-07).~~ **Không cần**: Q-07 chọn (b), docs không còn bản sao. | ISS-36 | Nhỏ |
 | DX-07 | Thống nhất tên gọi theo erd/OpenAPI ở các mục ISS-13 (b)–(g). | ISS-13 | Nhỏ |
 | DX-08 | Áp dụng đúng quy tắc docs/README §3: các tài liệu ngoài business-rules ghi **tên key** (ví dụ `qr.ttl_minutes`) thay vì số. Với AC trong urd, có thể ghi "15 phút (`qr.ttl_minutes`)" để vẫn dễ đọc. | ISS-32 | Trung bình |
 | DX-09 | Thêm cột "Triển khai" vào ma trận fsd/README §7, cập nhật cuối mỗi sprint (H.2 là bản đầu). | ISS-37…40 | Nhỏ |
@@ -43,9 +43,9 @@ Các giả định dưới đây là của **người thực hiện chuẩn hóa
 
 | ID | Đề xuất | Câu hỏi |
 |---|---|---|
-| DX-11 | Sửa architecture §5.2 theo CF-04 (lưu lỗi nghiệp vụ) và theo thứ tự kiểm tra của fsd/04. | Q-01, Q-02 |
+| DX-11 | Sửa architecture §5.2 theo CF-04 (lưu lỗi nghiệp vụ) và theo thứ tự kiểm tra của fsd/04. **Đã làm** (CHG-04, 05). | Q-01, Q-02 |
 | DX-12 | Thêm ADR-16 "Polyrepo" thay ADR-13; cập nhật architecture §11 và phiên bản Go. | Q-05 |
-| DX-13 | Merge nhánh `master` vào `main` của repo `E-Wallet`. | Q-06 |
+| DX-13 | Merge nhánh `master` vào `main` của repo `E-Wallet`. **Đã làm** (CHG-03); xóa `master` chờ chủ dự án. | Q-06 |
 | DX-14 | Tách BR-06 thành vòng đời khách hàng và vòng đời ví; bổ sung nhánh đồng bộ vào BR-45. | Q-08 |
 | DX-15 | Ghi rõ phạm vi BR-28 và cập nhật `x-br` của `payQr`, `createTopup`. | Q-12 |
 | DX-16 | Thêm `lookup.max_per_hour` vào business-rules §5. | Q-20 |

@@ -33,7 +33,7 @@ flowchart TD
 | [fsd/](fsd/) | **FSD / SRS** | Mỗi chức năng chạy chi tiết ra sao: luồng chính/thay thế/ngoại lệ, màn hình, validation, thông báo | Dev, tester | Draft — phạm vi M0 |
 | [architecture.md](architecture.md) | TDD / SAD | Hệ thống được chia thành những thành phần nào, giao tiếp ra sao | Dev | Reviewed |
 | [erd.md](erd.md) | TDD — mô hình dữ liệu | Dữ liệu lưu thế nào, ràng buộc gì, bút toán ra sao | Dev | Reviewed |
-| [api/wallet-core.openapi.yaml](api/wallet-core.openapi.yaml), [api/corebank.openapi.yaml](api/corebank.openapi.yaml) | Interface spec | Hợp đồng API giữa các hệ thống | Dev (BE, FE, mobile) | Draft, lint sạch |
+| [wallet-core `api/openapi.yaml`](https://github.com/Hungnd562k/E-Wallet-Wallet-Core/blob/main/api/openapi.yaml) (nguồn chuẩn ở repo `E-Wallet-Wallet-Core`), [api/corebank.openapi.yaml](api/corebank.openapi.yaml) | Interface spec | Hợp đồng API giữa các hệ thống | Dev (BE, FE, mobile) | Draft, lint sạch |
 | `failure-scenarios.md` | Test spec | Các kịch bản lỗi và cách kiểm chứng | Dev, tester | Chưa viết |
 | [Q&A.md](Q&A.md) | Ghi chú cá nhân | Giải thích thuật ngữ | — | — |
 | [chuan-hoa/](chuan-hoa/README.md) | Báo cáo chuẩn hóa tài liệu (A–I) | Bộ tài liệu đang có vấn đề gì, cần xác nhận gì, đã sẵn sàng tới đâu | Chủ dự án, BA | Draft — 2026-10-21 |

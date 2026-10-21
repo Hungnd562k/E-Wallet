@@ -74,7 +74,7 @@ Chép từ urd §4.
 
 ## H.3. BR → API → ERD → Module
 
-- **API**: từ thuộc tính `x-br` của từng operation trong `api/wallet-core.openapi.yaml` (nguồn có sẵn, không suy diễn).
+- **API**: từ thuộc tính `x-br` của từng operation trong OpenAPI của wallet-core (nguồn có sẵn, không suy diễn). Từ 2026-10-21 tệp này nằm ở repo `E-Wallet-Wallet-Core` (`api/openapi.yaml`, Q-07).
 - **ERD**: từ erd §9. **Module**: từ architecture §14 (theo nhóm BR).
 
 | BR | API (`x-br`) | Bảng / ràng buộc (erd §9) | Module (arch §14) |

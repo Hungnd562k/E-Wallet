@@ -20,8 +20,8 @@ Nguyên tắc: khi hai nguồn nói khác nhau, báo cáo **không tự chọn b
 
 | ID | Loại | Mức | Tóm tắt | Câu hỏi |
 |---|---|---|---|---|
-| ISS-01 | Mâu thuẫn | **Cao** | Lỗi nghiệp vụ có được lưu theo `Idempotency-Key` hay không | Q-01 |
-| ISS-02 | Mâu thuẫn | Trung bình | Thứ tự kiểm tra của `createTransfer` (PIN/step-up trước hay sau idempotency) | Q-02 |
+| ISS-01 | Mâu thuẫn | **Cao** | Lỗi nghiệp vụ có được lưu theo `Idempotency-Key` hay không · **Đã xử lý** (CHG-04) | Q-01 |
+| ISS-02 | Mâu thuẫn | Trung bình | Thứ tự kiểm tra của `createTransfer` (PIN/step-up trước hay sau idempotency) · **Đã xử lý** (CHG-05) | Q-02 |
 | ISS-03 | Mâu thuẫn | Trung bình | `back-office-web` làm ở M3 hay M4 | Q-03 |
 | ISS-04 | Mâu thuẫn | Thấp | Trạng thái và ngày cập nhật ở đầu tài liệu không khớp lịch sử | Q-04 |
 | ISS-05 | Mâu thuẫn | **Cao** | ADR-13 "Monorepo" khác cấu trúc repo thực tế | Q-05 |
@@ -53,9 +53,9 @@ Nguyên tắc: khi hai nguồn nói khác nhau, báo cáo **không tự chọn b
 | ISS-31 | Thiếu | Thấp | Nguồn gốc thảo luận (link ChatGPT) không được lưu trong repo | — |
 | ISS-32 | Trùng lặp | Trung bình | Giá trị tham số được chép lại ở nhiều tài liệu | Q-20 |
 | ISS-33 | Trùng lặp | Thấp | Jira draft xếp US-24 vào M3, PRD/FSD tách phần PIN vào M0 | — |
-| ISS-34 | Lỗi thời | **Cao** | Tài liệu nằm ở nhánh `master`; nhánh mặc định `main` gần như trống | Q-06 |
-| ISS-35 | Lỗi thời | Thấp | `wallet-core/CLAUDE.md` còn trỏ `scope.md` | — |
-| ISS-36 | Lỗi thời | Trung bình | Bản sao `wallet-core/api/openapi.yaml` lệch bản gốc | Q-07 |
+| ISS-34 | Lỗi thời | **Cao** | Tài liệu nằm ở nhánh `master`; nhánh mặc định `main` gần như trống · **Đã xử lý** (CHG-03) | Q-06 |
+| ISS-35 | Lỗi thời | Thấp | `wallet-core/CLAUDE.md` còn trỏ `scope.md` · **Đã xử lý** (CHG-07) | — |
+| ISS-36 | Lỗi thời | Trung bình | Bản sao `wallet-core/api/openapi.yaml` lệch bản gốc · **Đã xử lý** (CHG-06) | Q-07 |
 | ISS-37 | Lệch mã | Trung bình | Mã lỗi trong code khác catalogue `x-error-codes` | Q-19 |
 | ISS-38 | Lệch mã | Trung bình | `getPayment` chỉ cho người khởi tạo xem; response khác schema | Q-30 |
 | ISS-39 | Lệch mã | Trung bình | `createTransfer` chưa có PIN, hạn mức, khoảng số tiền, tra SĐT | Q-31 |
@@ -80,6 +80,8 @@ Theo mức: **Cao 6** · Trung bình 17 · Thấp 17. Theo loại: mâu thuẫn 
 **Ảnh hưởng**: hành vi client khi gửi lại (CF-04) phụ thuộc trực tiếp vào điểm này; đọc architecture.md sẽ hiểu sai.
 **Đề xuất** [ĐỀ XUẤT]: 4/5 nguồn (gồm cả mã) thống nhất "lưu lỗi nghiệp vụ". Nếu chủ dự án xác nhận, sửa câu trong architecture §5.2 thành "…key idempotency chỉ lưu lại kết quả lỗi nghiệp vụ, không lưu lỗi hệ thống".
 
+**Trạng thái**: Đã xử lý, 2026-10-21. Chủ dự án chọn Q-01 (a); architecture §5.2 đã sửa (CHG-04).
+
 ### ISS-02 — Thứ tự kiểm tra của `createTransfer` · Trung bình · [MÂU THUẪN]
 
 - architecture §5.2 (sequence): `payment/http → authz.Verify` (PIN/step-up) **trước** `BEGIN` và trước bước idempotency.
@@ -87,6 +89,8 @@ Theo mức: **Cao 6** · Trung bình 17 · Thấp 17. Theo loại: mâu thuẫn 
 
 **Ảnh hưởng**: thứ tự này quyết định lỗi nào trả về khi nhiều điều kiện cùng sai, và việc lần gửi lại có kiểm PIN hay không. FSD ghi rõ "Thứ tự kiểm tra cố định để lỗi trả về nhất quán".
 **Đề xuất** [ĐỀ XUẤT]: coi fsd/04 là đặc tả chi tiết; cập nhật sequence ở architecture §5.2 cho khớp, sau khi xác nhận.
+
+**Trạng thái**: Đã xử lý, 2026-10-21. Chủ dự án chọn Q-02 (a); sequence ở architecture §5.2 đã sửa (CHG-05).
 
 ### ISS-03 — `back-office-web` làm ở M3 hay M4 · Trung bình · [MÂU THUẪN]
 
@@ -268,13 +272,19 @@ progression/jira-backlog-draft xếp US-24 vào M3. prd F-07 là "M0 / M3" và U
 
 Repo `Hungnd562k/E-Wallet`: nhánh mặc định `main` chỉ có `README.md` (2 dòng) và `.gitignore`. Toàn bộ `docs/` và `progression/` nằm ở nhánh `master` (commit mới nhất `087c3ff`, 2026-10-20). Người clone repo theo mặc định không thấy tài liệu; `wallet-core/CLAUDE.md` mặc định `../E-Wallet/docs/` tồn tại.
 
+**Trạng thái**: Đã xử lý, 2026-10-21. Chủ dự án chọn Q-06: merge vào `main` rồi bỏ `master` (CHG-03). Việc xóa nhánh `master` còn chờ chủ dự án.
+
 ### ISS-35 — `wallet-core/CLAUDE.md` còn trỏ `scope.md` · Thấp
 
 CLAUDE.md liệt kê `scope.md: the BR-xx business rules`. File này đã đổi tên thành `business-rules.md` ngày 2026-10-17 (docs/README §4).
 
+**Trạng thái**: Đã xử lý, 2026-10-21 (CHG-07).
+
 ### ISS-36 — Bản sao OpenAPI trong wallet-core lệch bản gốc · Trung bình · [CẦN XÁC NHẬN]
 
 So sánh `E-Wallet-Wallet-Core/api/openapi.yaml` với `E-Wallet/docs/api/wallet-core.openapi.yaml` (`diff`), có 4 khác biệt: bản sao còn trỏ `docs/scope.md` (2 chỗ), thiếu tham số lọc `action`, `outcome` và response `403` của `adminListAuditLogs`. CLAUDE.md nói bản trong wallet-core "is a copy"; architecture §11 nói contract "chuyển từ docs/api khi scaffold". Chưa rõ bản nào là nguồn chuẩn.
+
+**Trạng thái**: Đã xử lý, 2026-10-21. Chủ dự án chọn Q-07 (b): `E-Wallet-Wallet-Core/api/openapi.yaml` là nguồn chuẩn (CHG-06).
 
 ---
 

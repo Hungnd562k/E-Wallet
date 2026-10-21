@@ -1,7 +1,7 @@
 # FSD — Đặc tả chức năng
 
 > Trạng thái: **DRAFT — phạm vi M0** · Cập nhật: 2026-10-18
-> Liên quan: [README](../README.md) · [urd.md](../urd.md) (`US-xx`) · [prd.md](../prd.md) (`F-xx`) · [business-rules.md](../business-rules.md) (`BR-xx`) · [erd.md](../erd.md) · [api/wallet-core.openapi.yaml](../api/wallet-core.openapi.yaml)
+> Liên quan: [README](../README.md) · [urd.md](../urd.md) (`US-xx`) · [prd.md](../prd.md) (`F-xx`) · [business-rules.md](../business-rules.md) (`BR-xx`) · [erd.md](../erd.md) · [wallet-core OpenAPI](https://github.com/Hungnd562k/E-Wallet-Wallet-Core/blob/main/api/openapi.yaml)
 
 FSD mô tả **từng chức năng chạy chi tiết ra sao**: các bước, màn hình, trường dữ liệu, kiểm tra, thông báo, trạng thái và dữ liệu thay đổi. FSD **không** lặp lại:
 
@@ -147,7 +147,7 @@ Khi giao dịch vượt ngưỡng BR-36 (hoặc thiết bị mới, BR-38), serv
 
 ## 5. Danh mục thông báo
 
-Thông báo tiếng Việt cho các mã lỗi trong `x-error-codes` của [wallet-core.openapi.yaml](../api/wallet-core.openapi.yaml). Mỗi thông báo nói người dùng **làm gì tiếp** (UR-NF-06). `{…}` lấy từ `details` của response.
+Thông báo tiếng Việt cho các mã lỗi trong `x-error-codes` của [wallet-core OpenAPI](https://github.com/Hungnd562k/E-Wallet-Wallet-Core/blob/main/api/openapi.yaml). Mỗi thông báo nói người dùng **làm gì tiếp** (UR-NF-06). `{…}` lấy từ `details` của response.
 
 Bảng dưới gồm các mã dùng ở M0; mã khác bổ sung khi viết file tương ứng.
 

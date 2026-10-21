@@ -226,27 +226,31 @@ Event có tên kèm phiên bản và payload JSON có schema, ví dụ: `payment
 sequenceDiagram
     actor U as App
     participant H as payment/http
-    participant AZ as authz
     participant P as payment
+    participant AZ as authz
     participant L as limit
     participant LG as ledger
     participant DB as wallet-db
 
-    U->>H: POST /transfers (Idempotency-Key, PIN/challenge)
-    H->>AZ: Verify(customer, txn intent)
-    AZ-->>H: OK hoặc 401 STEP_UP_REQUIRED + challenge_id
+    U->>H: POST /transfers (Idempotency-Key, PIN, X-Challenge-Id nếu có)
+    H->>H: xác thực token + X-Device-Id, kiểm tra định dạng
     H->>P: Transfer(cmd)
     P->>DB: BEGIN
     P->>DB: idempotency: insert key (hoặc trả response đã lưu)
-    P->>LG: Lock 2 ví theo thứ tự id tăng dần
+    P->>AZ: kiểm tra PIN (bộ đếm PIN sai ghi ở transaction riêng, UC-04.02)
+    P->>P: kiểm tra khoảng số tiền
+    P->>AZ: kiểm tra step-up theo intent, thiếu challenge thì 401 STEP_UP_REQUIRED
+    P->>LG: Lock 2 ví theo thứ tự id tăng dần, kiểm tra trạng thái ví
     P->>L: CheckAndConsume(customer, month, amount)
     P->>LG: Post(debit A, credit B)
-    P->>DB: insert payment SUCCEEDED + outbox payment.succeeded.v1
+    P->>DB: insert payment SUCCEEDED + outbox payment.succeeded.v1 + lưu response idempotency
     P->>DB: COMMIT
     H-->>U: 201 SUCCEEDED
 ```
 
-Bất kỳ bước nào lỗi thì toàn bộ rollback: hạn mức không bị trừ, không có bút toán, key idempotency không bị chiếm.
+Thứ tự kiểm tra chi tiết và mã lỗi của từng bước: [fsd/04 UC-04.01 §Xử lý phía hệ thống](fsd/04-p2p-transfer.md#xử-lý-phía-hệ-thống).
+
+Bất kỳ bước nào lỗi thì toàn bộ rollback: hạn mức không bị trừ, không có bút toán. Riêng key idempotency: kết quả lỗi nghiệp vụ `422` vẫn được lưu gắn với key để request lặp lại nhận cùng kết quả; `401`, `423`, `409`, `429`, `5xx` không chiếm key (fsd/README CF-04 bước 5).
 
 ### 5.3. Nạp tiền (đồng bộ ghi nhận + bất đồng bộ với ngân hàng)
 
@@ -359,7 +363,7 @@ Nguyên tắc chung (tiền là số nguyên, idempotency, mã lỗi chuẩn hó
 - Lỗi có định dạng thống nhất: `{ "error": "<CODE>", "message", "details", "request_id" }`. Mã lỗi nghiệp vụ map sang `4xx`, chỉ lỗi hệ thống mới là `5xx`.
 - API back-office nằm dưới `/admin/v1/*` và dùng token realm khác.
 
-Contract chi tiết (OpenAPI 3.1): [`api/wallet-core.openapi.yaml`](api/wallet-core.openapi.yaml) và [`api/corebank.openapi.yaml`](api/corebank.openapi.yaml).
+Contract chi tiết (OpenAPI 3.1): [`E-Wallet-Wallet-Core/api/openapi.yaml`](https://github.com/Hungnd562k/E-Wallet-Wallet-Core/blob/main/api/openapi.yaml) (nguồn chuẩn, nằm cùng mã) và [`api/corebank.openapi.yaml`](api/corebank.openapi.yaml).
 
 ---
 
@@ -452,7 +456,7 @@ Monorepo:
 ```text
 E-Wallet/
 ├── docs/                 # README, prd, urd, business-rules, fsd/, architecture, erd, api/, failure-scenarios
-├── wallet-core/          # Go — cmd/api, cmd/worker, internal/, migrations/, api/openapi.yaml (chuyển từ docs/api khi scaffold)
+├── wallet-core/          # Go — cmd/api, cmd/worker, internal/, migrations/, api/openapi.yaml (nguồn chuẩn của contract wallet-core)
 ├── corebank/             # Java 21, Spring Boot 3, Gradle
 ├── merchant-sim/         # Go
 ├── app-mobile/           # Flutter
@@ -533,3 +537,4 @@ Các kịch bản E2E sẽ được liệt kê trong `failure-scenarios.md`.
 ## 15. Lịch sử
 
 - 2026-10-18: Review `architecture.md` done
+- 2026-10-21: §5.2 sequence theo thứ tự kiểm tra của fsd/04; làm rõ idempotency lưu lỗi nghiệp vụ (Q-01, Q-02). Contract wallet-core chuyển sang repo `E-Wallet-Wallet-Core` (Q-07).
