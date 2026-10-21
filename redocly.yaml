@@ -1,0 +1,12 @@
+extends:
+  - recommended
+
+apis:
+  corebank:
+    root: docs/api/corebank.openapi.yaml
+
+# Contract wallet-core nằm ở repo E-Wallet-Wallet-Core (api/openapi.yaml) và được lint ở đó.
+
+rules:
+  # Môi trường duy nhất là local (docker compose) — xem docs/architecture.md §11.
+  no-server-example.com: off
