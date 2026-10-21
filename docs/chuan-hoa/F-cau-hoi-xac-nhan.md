@@ -59,11 +59,13 @@ architecture §5.2 nói key "không bị chiếm" khi lỗi; CF-04, erd §4.7, O
 
 - (a) Lưu lỗi nghiệp vụ `422`; không lưu `401/423/409/429/5xx` (như CF-04). [ĐỀ XUẤT] → sửa câu trong architecture §5.2.
 - (b) Không lưu lỗi nào (như architecture §5.2) → phải sửa CF-04, AC-7 UC-04.01, erd §4.7, OpenAPI và mã.
+- Dùng (a) mặc định nếu như luồng phù hợp, tôi chưa lm tới đoạn đó nên cũng chưa hiểu hết luồng đó chi tiết như nào, nếu trong tương lai phát sinh mâu thuẫn sẽ sửa đổi sau.
 
 ### Q-02 — Thứ tự kiểm tra của lệnh tạo giao dịch (ISS-02)
 
 - (a) Theo fsd/04: idempotency → PIN → khoảng số tiền → step-up → khóa ví → trạng thái → hạn mức → bút toán. [ĐỀ XUẤT] → cập nhật sequence architecture §5.2.
 - (b) Theo architecture §5.2: xác thực (PIN/step-up) trước rồi mới mở transaction và idempotency → sửa bảng ở fsd/04 và UC-04.02.
+- Dùng (a)
 
 ### Q-03 — `back-office-web` M3 hay M4? (ISS-03)
 
@@ -86,6 +88,7 @@ prd §9, F-20 và fsd/09 nói M4; architecture §3, §11 nói M3. [ĐỀ XUẤT]
 - (a) Merge `master` vào `main` và dùng `main` làm nhánh chính. [ĐỀ XUẤT]
 - (b) Đổi nhánh mặc định của repo sang `master`.
 - (c) Giữ nguyên.
+- Tạo và merge Pull request vào nhánh main, sau đó discard master đi
 
 PR của lần chuẩn hóa này được mở **vào `master`** để không trộn với quyết định này.
 
@@ -93,6 +96,7 @@ PR của lần chuẩn hóa này được mở **vào `master`** để không tr
 
 - (a) `E-Wallet/docs/api/` là nguồn chuẩn; wallet-core giữ bản sao và có bước kiểm tra `diff` trong CI. [ĐỀ XUẤT]
 - (b) `E-Wallet-Wallet-Core/api/openapi.yaml` là nguồn chuẩn (như architecture §11 dự kiến); docs chỉ trỏ link.
+- Dùng (b)
 
 Dù chọn bên nào, bản sao hiện tại đang thiếu thay đổi của commit `SCRUM-70`.
 
