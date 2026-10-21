@@ -36,6 +36,7 @@ flowchart TD
 | [api/wallet-core.openapi.yaml](api/wallet-core.openapi.yaml), [api/corebank.openapi.yaml](api/corebank.openapi.yaml) | Interface spec | Hợp đồng API giữa các hệ thống | Dev (BE, FE, mobile) | Draft, lint sạch |
 | `failure-scenarios.md` | Test spec | Các kịch bản lỗi và cách kiểm chứng | Dev, tester | Chưa viết |
 | [Q&A.md](Q&A.md) | Ghi chú cá nhân | Giải thích thuật ngữ | — | — |
+| [chuan-hoa/](chuan-hoa/README.md) | Báo cáo chuẩn hóa tài liệu (A–I) | Bộ tài liệu đang có vấn đề gì, cần xác nhận gì, đã sẵn sàng tới đâu | Chủ dự án, BA | Draft — 2026-10-21 |
 
 ## 2. Quy ước ID và chuỗi truy vết
 
