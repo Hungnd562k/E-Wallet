@@ -363,7 +363,7 @@ Nguyên tắc chung (tiền là số nguyên, idempotency, mã lỗi chuẩn hó
 - Lỗi có định dạng thống nhất: `{ "error": "<CODE>", "message", "details", "request_id" }`. Mã lỗi nghiệp vụ map sang `4xx`, chỉ lỗi hệ thống mới là `5xx`.
 - API back-office nằm dưới `/admin/v1/*` và dùng token realm khác.
 
-Contract chi tiết (OpenAPI 3.1): [`E-Wallet-Wallet-Core/api/openapi.yaml`](https://github.com/Hungnd562k/E-Wallet-Wallet-Core/blob/main/api/openapi.yaml) (nguồn chuẩn, nằm cùng mã) và [`api/corebank.openapi.yaml`](api/corebank.openapi.yaml).
+Contract chi tiết (OpenAPI 3.1): [`E-Wallet-Wallet-Core/api/openapi.yaml`](https://github.com/Hungnd562k/E-Wallet-Wallet-Core/blob/development/api/openapi.yaml) (nguồn chuẩn, nằm cùng mã) và [`api/corebank.openapi.yaml`](api/corebank.openapi.yaml).
 
 ---
 
