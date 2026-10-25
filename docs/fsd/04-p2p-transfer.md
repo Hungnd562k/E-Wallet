@@ -1,6 +1,6 @@
 # FSD 04 — Chuyển tiền ví–ví
 
-> Trạng thái: **DRAFT** · Cập nhật: 2026-10-18 · Milestone: **M0**
+> Trạng thái: **DRAFT** · Cập nhật: 2026-10-25 · Milestone: **M0**
 > Liên quan: [fsd/README](README.md) (CF-xx, thông báo) · [urd.md](../urd.md) US-21, US-24 · [prd.md](../prd.md) F-05, F-07 · [business-rules.md](../business-rules.md) BR-23…29, 35, 36, 39, 47 · [architecture.md](../architecture.md) §5.2 · [erd.md](../erd.md) §3.2, §4.5, §4.7
 
 | UC | Tên | Milestone |
@@ -17,7 +17,7 @@
 | Actor | Khách hàng gửi (P1, P2). Khách hàng nhận là actor thụ động. |
 | Mục tiêu | Chuyển tiền tức thời từ ví mình sang ví của người khác trong hệ thống. |
 | Trigger | Người dùng chọn **Chuyển tiền** trên màn hình chính. |
-| Tiền điều kiện | Đã đăng nhập trên thiết bị đang hoạt động; ví gửi `ACTIVE`; đã có PIN. Ở M0 khách hàng và ví được tạo bằng seed `dev`. |
+| Tiền điều kiện | Đã đăng nhập trên thiết bị đang hoạt động; ví gửi `ACTIVE`; đã có PIN. Ở M0 khách hàng, ví, PIN và thiết bị được tạo bằng seed `dev`, và khách hàng được xác định bằng xác thực dev (fsd/README §8.1, §8.2). |
 | Hậu điều kiện — thành công | 1 payment `TRANSFER` ở trạng thái `SUCCEEDED`; ví gửi giảm, ví nhận tăng đúng `amount` (bút toán erd §3.2 dòng 2); hạn mức `MONTH_GENERAL` và `DAY_OTHER` của người gửi tăng `amount`; 2 dòng lịch sử (OUT cho người gửi, IN cho người nhận); event `payment.succeeded.v1`. |
 | Hậu điều kiện — thất bại | Không có payment, không có bút toán, hạn mức không đổi. Lỗi nghiệp vụ `422` được lưu với `Idempotency-Key` (CF-04). |
 | Milestone · US · F | M0 · US-21, US-24 · F-05, F-07 |
@@ -93,7 +93,7 @@ Mọi ngoại lệ ở bước 7 xảy ra **trước** khi ghi bút toán, hoặ
 
 | # | Bước | BR | Lỗi |
 |---|---|---|---|
-| 1 | Xác thực token, `X-Device-Id` là thiết bị active | BR-38 | `401 UNAUTHENTICATED` / `DEVICE_NOT_BOUND` |
+| 1 | Xác thực token, `X-Device-Id` là thiết bị active. **M0**: chỉ xác định khách hàng bằng xác thực dev, chưa kiểm thiết bị (fsd/README §8.2) | BR-38 | `401 UNAUTHENTICATED` / `DEVICE_NOT_BOUND` (từ M3) |
 | 2 | Kiểm tra định dạng request | — | `400 VALIDATION_ERROR` |
 | 3 | Idempotency: key đã có kết quả → trả lại; đang xử lý → `409`; khác nội dung → `422` | NFR-02 | CF-04 |
 | 4 | Kiểm tra PIN (UC-04.02) | BR-35, 39 | `401` / `423` |

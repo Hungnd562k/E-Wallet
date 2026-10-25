@@ -227,7 +227,7 @@ docs/README §1 ghi "Chưa viết". Phụ thuộc: SM-02 (tiêu chí Done của 
 
 ### ISS-25 — FSD và UC chưa viết · Cao cho M1 · [TBD]
 
-Chưa viết: `fsd/01, 02, 03, 05, 06, 08`; UC-07.05…07; UC-09.02…11. **M1 cần** fsd/02 (liên kết), fsd/03 (nạp), fsd/05 (rút, liên ngân hàng), UC-09.06, UC-09.07 (đối soát). Sprint 1 kết thúc 2026-11-01 (jira-backlog-draft).
+Chưa viết: `fsd/01, 02, 03, 05, 06, 08`; UC-07.05…07; UC-09.03…11. UC-09.02 (đăng nhập back-office, phần API thuộc M0) đã viết ngày 2026-10-25 (CHG-09), nên M0 không còn UC nào chưa viết. **M1 cần** fsd/02 (liên kết), fsd/03 (nạp), fsd/05 (rút, liên ngân hàng), UC-09.06, UC-09.07 (đối soát). Sprint 1 kết thúc 2026-11-01 (jira-backlog-draft).
 
 ### ISS-26 — US-11, US-44 không có tiêu chí chấp nhận · Trung bình · [CẦN XÁC NHẬN]
 
@@ -336,6 +336,8 @@ Quan sát ở `internal/payment/http/handler.go` (`createTransfer`, commit `9a05
 2. Khi chuyển theo SĐT, mã gán cho người nhận là `customer.Id` chứ không phải mã ví. Theo `wallet.wallets`, `id` khác `customer_id` (migration 0003), nên giao dịch sẽ không tìm thấy ví.
 3. Sau khi trả `UNVERIFIED_CUSTOMER` thiếu `return`, nên handler vẫn gọi `Transfer` và ghi response lần hai.
 4. Mã lỗi khác catalogue và fsd/04 E2 (xem ISS-37).
+
+**Cập nhật 2026-10-25** (`development@85493db`): commit `9a05355` đã được revert (`52ce052`, lý do: phá cấu trúc dependency, unit test lỗi). `createTransfer` quay về trạng thái trước SCRUM-25 (chỉ nhận `recipient.wallet_id`), nên 3 lỗi trên không còn trong mã; US-21 theo SĐT làm lại sau. Khi làm lại, vẫn áp dụng đề xuất dưới đây.
 
 **Đề xuất** [ĐỀ XUẤT]: tra SĐT → khách hàng → ví (qua `wallet`), giữ nhánh `wallet_id`, thêm `return`, dùng `NOT_FOUND` / `RECIPIENT_INVALID` theo fsd/04, và thêm integration test cho cả hai kiểu người nhận. Việc sửa mã thuộc repo wallet-core, không nằm trong lần chuẩn hóa tài liệu.
 

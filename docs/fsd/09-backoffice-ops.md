@@ -1,12 +1,12 @@
 # FSD 09 — Vận hành back-office
 
-> Trạng thái: **DRAFT — phần M0 (audit log)** · Cập nhật: 2026-10-18 · Milestone: **M0** (§1, UC-09.01), M1, M4
+> Trạng thái: **DRAFT — phần M0 (audit log, đăng nhập back-office)** · Cập nhật: 2026-10-25 · Milestone: **M0** (§1, UC-09.01, UC-09.02 phần API), M1, M4
 > Liên quan: [fsd/README](README.md) · [urd.md](../urd.md) US-70…81 · [prd.md](../prd.md) F-17…22 · [business-rules.md](../business-rules.md) BR-56…64, 71 · [architecture.md](../architecture.md) §8.1 · [erd.md](../erd.md) §4.12
 
 | UC | Tên | US | Milestone | Trạng thái |
 |---|---|---|---|---|
 | [UC-09.01](#uc-0901--tra-cứu-audit-log) | Tra cứu audit log | US-81 | M0 | Draft |
-| UC-09.02 | Đăng nhập back-office | — | M4 (M0 dùng tài khoản seed) | Chưa viết |
+| [UC-09.02](#uc-0902--đăng-nhập-back-office) | Đăng nhập back-office | — | M0 (API) / M4 (UI) | Draft |
 | UC-09.03 | Tra cứu khách hàng | US-70 | M4 | Chưa viết |
 | UC-09.04 | Duyệt eKYC thủ công, xem ảnh giấy tờ | US-71, 72 | M4 | Chưa viết |
 | UC-09.05 | Phong tỏa / gỡ phong tỏa ví | US-73 | M4 | Chưa viết |
@@ -17,7 +17,7 @@
 | UC-09.10 | Xử lý khiếu nại | US-79 | M4 | Chưa viết |
 | UC-09.11 | Quản trị tham số cấu hình | US-80 | M4 | Chưa viết |
 
-Ở M0 chưa có giao diện back-office (React, M4). UC-09.01 được giao dưới dạng API; tài khoản staff được tạo bằng seed `dev` và đăng nhập qua `adminLogin`.
+Ở M0 chưa có giao diện back-office (React, M4). UC-09.01 và UC-09.02 được giao dưới dạng API; tài khoản staff được tạo bằng seed `dev` ([fsd/README §8.1](README.md#81-dữ-liệu-seed)) và đăng nhập qua `adminLogin` (UC-09.02).
 
 ---
 
@@ -48,7 +48,7 @@ Quy ước `action`: `<đối tượng>.<hành động>` viết thường, ví d
 | Action | Actor | Resource | Khi nào | Milestone |
 |---|---|---|---|---|
 | `auth.pin.locked` | CUSTOMER | customer | PIN bị khóa tạm hoặc khóa cứng (UC-04.02); `metadata.hard` | **M0** |
-| `staff.login` | STAFF | staff | Đăng nhập back-office (thành công / thất bại) | **M0** |
+| `staff.login` | STAFF | staff | Đăng nhập back-office, thành công hoặc thất bại (UC-09.02); `metadata.method` = `PASSWORD` / `REFRESH` | **M0** |
 | `audit.search` | STAFF | audit_log | Tra cứu audit log (UC-09.01); `metadata` = bộ lọc | **M0** |
 | `auth.device.bind` | CUSTOMER | device | Đăng nhập máy mới, máy cũ bị hủy gắn | M3 |
 | `auth.pin.reset` | CUSTOMER | customer | Đặt lại PIN qua OTP + khuôn mặt | M3 |
@@ -135,3 +135,91 @@ Từ urd.md **US-81**: lọc được theo người thực hiện, đối tượ
 | AC-2 | Staff role `SUPPORT` | Gọi `adminListAuditLogs` | `403`; có 1 dòng `audit.search` với `outcome = DENIED` |
 | AC-3 | CHECKER tra cứu | Tra cứu lại ngay sau đó | Thấy dòng `audit.search` của lần tra cứu trước |
 | AC-4 | Dữ liệu test có CCCD, PIN, OTP đã biết | Tìm các giá trị đó trong toàn bộ `audit.audit_logs` (mọi cột, kể cả `metadata`) | Không tìm thấy |
+
+---
+
+## UC-09.02 — Đăng nhập back-office
+
+| Thuộc tính | Giá trị |
+|---|---|
+| Actor | Mọi staff (P3 `SUPPORT`, P4 `OPERATOR`, P5 `CHECKER`, P6 `ADMIN`) |
+| Mục tiêu | Lấy token back-office để gọi các API `/admin/v1/*` theo đúng role của mình. |
+| Trigger | Mở back-office khi chưa có phiên; access token hết hạn; bấm **Đăng nhập** sau khi bị đăng xuất. Ở M0: gọi API trực tiếp (Bruno / HTTP files). |
+| Tiền điều kiện | Tài khoản có trong `backoffice.staff_users`. Ở M0 tài khoản được tạo bằng seed `dev` (fsd/README §8.1); tạo, khóa tài khoản staff qua giao diện làm sau (M4). |
+| Hậu điều kiện — thành công | Có 1 phiên mới trong `backoffice.staff_sessions`; trả cặp token và role; `last_login_at` được cập nhật; 1 bản ghi audit `staff.login` (`SUCCESS`). |
+| Hậu điều kiện — thất bại | Không có phiên mới; 1 bản ghi audit `staff.login` (`DENIED`). |
+| Milestone · US · F | M0 (API) / M4 (UI) · — (hạ tầng cho US-70…81) · F-20, F-22 |
+
+Không có user story riêng: đây là bước bắt buộc trước mọi US của staff. Cơ chế token theo architecture §8.1 ("Back-office: realm riêng").
+
+### Luồng chính
+
+| # | Actor | Hệ thống |
+|---|---|---|
+| 1 | Nhập email, mật khẩu (S-09.2), bấm **Đăng nhập**. | Gọi `adminLogin`. |
+| 2 | | Chuẩn hóa email (bỏ khoảng trắng, chữ thường); tìm `staff_users` theo email. |
+| 3 | | Kiểm tra `status = ACTIVE`; so khớp mật khẩu với `password_hash` (argon2id). |
+| 4 | | Nếu tài khoản đã bật MFA (`mfa_secret_enc` khác `null`): kiểm tra `totp` (A1). |
+| 5 | | Tạo `staff_sessions` (lưu hash của refresh token, `ip`, `expires_at`); cập nhật `last_login_at`; ghi audit `staff.login` (`SUCCESS`, `metadata.method = PASSWORD`). |
+| 6 | | Trả `200` với `access_token`, `refresh_token`, `expires_in`, `staff` (`staff_id`, `email`, `display_name`, `roles`). |
+| 7 | | Back-office (M4) hiện menu theo `roles`: ví dụ menu **Audit log** chỉ hiện với `CHECKER`, `ADMIN` (UC-09.01 E1). |
+
+### Luồng thay thế
+
+| ID | Rẽ tại | Mô tả |
+|---|---|---|
+| A1 | 4 | Tài khoản có MFA: thiếu `totp` → back-office hiện thêm ô "Mã xác thực 6 số" và gửi lại bước 1 kèm `totp`. Ở M0 seed **không** bật MFA cho tài khoản nào; bắt buộc MFA cho mọi staff là quyết định của M4 [P]. |
+| A2 | — | Làm mới token: khi access token hết hạn (`401 UNAUTHENTICATED` ở một API admin), client gọi `adminRefreshToken` với refresh token hiện có. Server kiểm tra phiên còn hạn, chưa thu hồi, staff vẫn `ACTIVE`; **xoay vòng** refresh token (lưu hash mới vào cùng phiên) và trả cặp token mới. Ghi audit `staff.login` (`SUCCESS`, `metadata.method = REFRESH`). Client gửi lại request vừa lỗi 1 lần (giống CF-07). |
+
+### Luồng ngoại lệ
+
+| ID | Điều kiện | Bước | Mã lỗi | Hành vi |
+|---|---|---|---|---|
+| E1 | Thiếu email / mật khẩu, email sai định dạng | 1 | `400 VALIDATION_ERROR` | Đánh dấu trường lỗi |
+| E2 | Email không tồn tại, hoặc sai mật khẩu | 2, 3 | `401 UNAUTHENTICATED` | "Email hoặc mật khẩu không đúng." Cùng một thông báo cho cả hai trường hợp, để không dò được email nào có tài khoản. Audit `DENIED`, `metadata.reason = BAD_CREDENTIALS`. |
+| E3 | Tài khoản `DISABLED` | 3 | `401 UNAUTHENTICATED` | Cùng thông báo như E2. Audit `DENIED`, `metadata.reason = DISABLED`. |
+| E4 | Có MFA nhưng `totp` thiếu hoặc sai | 4 | `401 UNAUTHENTICATED` | "Mã xác thực không đúng." Audit `DENIED`, `metadata.reason = MFA_FAILED`. |
+| E5 | Refresh token không tồn tại, hết hạn, đã thu hồi, hoặc là token cũ đã bị xoay vòng | A2 | `401 UNAUTHENTICATED` | Về màn đăng nhập. Token cũ dùng lại → thu hồi luôn phiên đó (`revoked_at`) [P]. |
+| E6 | Gửi sai quá nhiều lần | 1 | `429 RATE_LIMITED` | Chống dò mật khẩu bằng rate limit chung theo email và IP [P]. Ngưỡng chưa có ở business-rules §5, và OpenAPI chưa khai báo `429` cho `adminLogin`; cần bổ sung khi làm rate limit. |
+
+Không có thông báo nào cho biết email có tồn tại hay không, hay tài khoản bị khóa (E2, E3).
+
+### Màn hình & trường
+
+**S-09.2 — Đăng nhập back-office** (M4; ở M0 là body của `adminLogin`)
+
+| Trường | Kiểu | Bắt buộc | Kiểm tra | Map API |
+|---|---|---|---|---|
+| Email | email | ✔ | Định dạng email | `email` |
+| Mật khẩu | password (ẩn) | ✔ | Không rỗng; không cắt khoảng trắng | `password` |
+| Mã xác thực | 6 chữ số | Khi có MFA (A1) | `^[0-9]{6}$` | `totp` |
+
+### Xử lý phía hệ thống
+
+- Token back-office là **realm riêng** (issuer / audience khác token khách hàng). Token khách hàng gọi `/admin/v1/*` bị từ chối `401`, và ngược lại (architecture §7.3, §8.1).
+- Role nằm trong access token; mỗi API admin kiểm tra role theo `x-roles` của OpenAPI. Sai role → `403 FORBIDDEN`, ghi audit `DENIED` cho chính thao tác đó (AU-3, ví dụ UC-09.01 E1).
+- Thời hạn [P]: access token 15 phút (như khách hàng, architecture §8.1); refresh token 12 giờ, tức một ca làm việc. Hết 12 giờ phải đăng nhập lại.
+- Staff bị chuyển `DISABLED` khi đang có phiên: refresh tiếp theo bị từ chối (E5); access token đã cấp còn dùng được tới khi hết hạn (tối đa 15 phút) [P].
+- Mật khẩu, refresh token, `totp` **không** được log, không nằm trong audit (AU-7, BR-71). Audit thất bại ghi email đã che (ví dụ `n***@example.com`) trong `metadata.email`; `actor_id` = `staff_id` nếu tìm thấy, `null` nếu không.
+- `adminLogin`, `adminRefreshToken` không cần `Idempotency-Key` (không tạo giao dịch tiền).
+
+### Dữ liệu
+
+| Hạng mục | Chi tiết |
+|---|---|
+| API | `adminLogin`, `adminRefreshToken` |
+| Bảng | `backoffice.staff_users` (đọc; cập nhật `last_login_at`), `backoffice.staff_sessions` (tạo, xoay vòng, thu hồi) (erd §4.13) |
+| Audit | `staff.login` (§1.3): `actor_type = STAFF`, `resource_type = staff`, `resource_id` = `staff_id` (hoặc `-` khi email không tồn tại), `outcome`, `metadata.method`, `metadata.reason` khi `DENIED` |
+
+### Tiêu chí chấp nhận
+
+| # | Given | When | Then |
+|---|---|---|---|
+| AC-1 | Staff seed role `CHECKER`, `ACTIVE`, không MFA | `adminLogin` với email + mật khẩu đúng | `200`; `staff.roles = [CHECKER]`; 1 dòng `staff_sessions`; 1 audit `staff.login` `SUCCESS` |
+| AC-2 | Như AC-1 | Gọi `adminListAuditLogs` bằng access token vừa nhận | `200` (role đủ quyền) |
+| AC-3 | Staff seed role `SUPPORT` | Đăng nhập rồi gọi `adminListAuditLogs` | Đăng nhập `200`; tra cứu `403` (UC-09.01 AC-2) |
+| AC-4 | Bất kỳ | Đăng nhập với email không tồn tại, và với email đúng + sai mật khẩu | Cả hai trả `401` với **cùng** body (trừ `request_id`); mỗi lần 1 audit `DENIED` |
+| AC-5 | Tài khoản `DISABLED` | Đăng nhập với mật khẩu đúng | `401` như AC-4; không tạo phiên |
+| AC-6 | Đã đăng nhập | Gọi `adminRefreshToken` 2 lần với **cùng** refresh token | Lần 1 `200` với refresh token mới; lần 2 `401`, phiên bị thu hồi, refresh token mới của lần 1 cũng hết hiệu lực |
+| AC-7 | Access token của **khách hàng** | Gọi một API `/admin/v1/*` | `401 UNAUTHENTICATED` |
+| AC-8 | Bất kỳ | Tìm mật khẩu, refresh token, `totp` đã dùng trong log ứng dụng và toàn bộ `audit.audit_logs` | Không tìm thấy |
