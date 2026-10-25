@@ -1,6 +1,6 @@
 # H. Ma trận truy vết
 
-> Trạng thái: **DRAFT** · Lập: 2026-10-21 · Nguồn: urd §2, prd §7, fsd/README §7, OpenAPI `x-br`, erd §9, architecture §14, mã `wallet-core` commit `7332c9e`
+> Trạng thái: **DRAFT** · Lập: 2026-10-21 · Nguồn: urd §2, prd §7, fsd/README §7, OpenAPI `x-br`, erd §9, architecture §14, mã `wallet-core` nhánh `development` commit `7332c9e`, cập nhật cột Triển khai theo `9a05355` (2026-10-25)
 > Liên quan: [README](README.md) · [C. Danh mục yêu cầu](C-danh-muc-yeu-cau.md) · [D. Vấn đề](D-bao-cao-van-de.md)
 
 Chuỗi truy vết theo quy ước của dự án (docs/README §2): **Persona → US → F → UC → BR → API `operationId` / bảng ERD → TC**.
@@ -24,7 +24,7 @@ Chép từ urd §4.
 
 - **UC, API, ERD**: chỉ lấy từ ma trận fsd/README §7 (UC đã viết).
 - **TC**: chưa có — `failure-scenarios.md` chưa viết (ISS-24).
-- **Triển khai**: đối chiếu với mã `E-Wallet-Wallet-Core` nhánh `main` commit `7332c9e` (2026-10-21). Chỉ là quan sát, không phải nghiệm thu.
+- **Triển khai**: đối chiếu với mã `E-Wallet-Wallet-Core` nhánh `development` (nhánh mặc định), commit `9a05355` (2026-10-25). Chỉ là quan sát, không phải nghiệm thu.
 
 | US | F | Milestone | BR (urd) | UC | API (`operationId`) | Dữ liệu chính (erd) | TC | Triển khai |
 |---|---|---|---|---|---|---|---|---|
@@ -40,7 +40,7 @@ Chép từ urd §4.
 | US-11 | F-08 | M1 | — | — | — | — | — | Chưa |
 | US-12 | F-08 | M1 | BR-13 | — | — | — | — | Chưa |
 | US-20 | F-09 | M1 | BR-20, 49 | — | — | — | — | Chưa |
-| US-21 | F-05 | M0 | BR-23…29, 47 | UC-04.01 | `lookupRecipient`, `createTransfer` | `payment.payments`, `ledger.*`, `limits.*`, `platform.idempotency_keys`, `platform.outbox_events` | — | Một phần — `POST /v1/transfers` theo `recipient.wallet_id`; chưa có PIN, hạn mức, `lookupRecipient`, `recipient.phone` (ISS-39) |
+| US-21 | F-05 | M0 | BR-23…29, 47 | UC-04.01 | `lookupRecipient`, `createTransfer` | `payment.payments`, `ledger.*`, `limits.*`, `platform.idempotency_keys`, `platform.outbox_events` | — | Một phần — `POST /v1/transfers` đang chuyển sang tra theo `recipient.phone` (SCRUM-25) nhưng còn lỗi, nhánh `recipient.wallet_id` bị mất (ISS-41); chưa có PIN, hạn mức, `lookupRecipient` (ISS-39) |
 | US-22 | F-10 | M1 | BR-21, 50 | — | — | — | — | Chưa |
 | US-23 | F-11 | M1 | BR-22, 25, 50 | — | — | — | — | Chưa |
 | US-24 | F-07 | M0 / M3 | BR-35…40 | UC-04.02 | (trong mọi lệnh tạo giao dịch) | `identity.credentials` | — | Chưa — trường `pin` được nhận nhưng bị bỏ qua (ISS-39) |

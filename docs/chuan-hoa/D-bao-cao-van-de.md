@@ -1,7 +1,7 @@
 # D. Báo cáo lỗi và vấn đề
 
 > Trạng thái: **DRAFT — chờ chủ dự án xác nhận** · Lập: 2026-10-21
-> Nguồn đối chiếu: `E-Wallet` nhánh `master` commit `087c3ff` · `E-Wallet-Wallet-Core` nhánh `main` commit `7332c9e`
+> Nguồn đối chiếu: `E-Wallet` nhánh `master` commit `087c3ff` · `E-Wallet-Wallet-Core` nhánh `development` commit `7332c9e`. §8 đối chiếu lại với `development` commit `9a05355` ngày 2026-10-25
 > Liên quan: [README](README.md) · [F. Câu hỏi](F-cau-hoi-xac-nhan.md) · [G. Giả định & đề xuất](G-gia-dinh-de-xuat.md)
 
 Báo cáo này liệt kê các điểm **mâu thuẫn, mơ hồ, thiếu, trùng lặp, lỗi thời** trong bộ tài liệu, và các điểm **lệch giữa tài liệu và mã nguồn**. Mỗi vấn đề có bằng chứng trỏ về vị trí trong nguồn.
@@ -58,10 +58,11 @@ Nguyên tắc: khi hai nguồn nói khác nhau, báo cáo **không tự chọn b
 | ISS-36 | Lỗi thời | Trung bình | Bản sao `wallet-core/api/openapi.yaml` lệch bản gốc · **Đã xử lý** (CHG-06) | Q-07 |
 | ISS-37 | Lệch mã | Trung bình | Mã lỗi trong code khác catalogue `x-error-codes` | Q-19 |
 | ISS-38 | Lệch mã | Trung bình | `getPayment` chỉ cho người khởi tạo xem; response khác schema | Q-30 |
-| ISS-39 | Lệch mã | Trung bình | `createTransfer` chưa có PIN, hạn mức, khoảng số tiền, tra SĐT | Q-31 |
+| ISS-39 | Lệch mã | Trung bình | `createTransfer` chưa có PIN, hạn mức, khoảng số tiền; tra SĐT mới làm một phần | Q-31 |
 | ISS-40 | Lệch mã | Thấp | `GET /v1/wallet` đọc header trực tiếp, `status_reason` trả `""` | — |
+| ISS-41 | Lệch mã | **Cao** | `createTransfer` trên `development`: nhánh `recipient.wallet_id` bị mất, dùng mã khách hàng làm mã ví, thiếu `return` | — |
 
-Theo mức: **Cao 6** · Trung bình 17 · Thấp 17. Theo loại: mâu thuẫn 13 · mơ hồ 10 · thiếu 8 · trùng lặp 2 · lỗi thời 3 · lệch mã 4.
+Theo mức: **Cao 7** · Trung bình 17 · Thấp 17. Theo loại: mâu thuẫn 13 · mơ hồ 10 · thiếu 8 · trùng lặp 2 · lỗi thời 3 · lệch mã 5. ISS-41 thêm ngày 2026-10-25.
 
 ---
 
@@ -288,7 +289,9 @@ So sánh `E-Wallet-Wallet-Core/api/openapi.yaml` với `E-Wallet/docs/api/wallet
 
 ---
 
-## 8. Lệch giữa tài liệu và mã nguồn (wallet-core `7332c9e`)
+## 8. Lệch giữa tài liệu và mã nguồn (wallet-core `development`)
+
+> Bản đầu (2026-10-21) đối chiếu commit `7332c9e`; bản đầu ghi nhầm commit này thuộc nhánh `main`, thực ra nó thuộc `development` (nhánh mặc định của repo). Cập nhật 2026-10-25 theo `development` commit `9a05355`.
 
 Phần này là **quan sát** để tài liệu và mã không trôi xa nhau, không phải review mã. CLAUDE.md của wallet-core đã tự liệt kê một số "khoảng trống có chủ đích"; các điểm đó vẫn được ghi ở đây để ma trận truy vết phản ánh đúng.
 
@@ -301,7 +304,13 @@ Phần này là **quan sát** để tài liệu và mã không trôi xa nhau, kh
 | `PAYMENT_NOT_FOUND`, `WALLET_NOT_FOUND`, `LEDGER_ACCOUNT_NOT_FOUND` | `NOT_FOUND` |
 | `SAME_WALLET` | `RECIPIENT_INVALID` với `details.reason = SELF` |
 | `WALLET_INVALID_TRANSITION`, `CONCURRENT_UPDATE` | `STATE_CONFLICT` |
-| `UNSUPPORTED_CURRENCY`, `NOT_SUPPORTED_YET` | Không có |
+| `UNSUPPORTED_CURRENCY` | Không có |
+| `CUSTOMER_NOT_FOUND` (thêm ở `9a05355`) | `NOT_FOUND` (fsd/04 E2: không phân biệt SĐT chưa có ví và ví không nhận được) |
+| `UNVERIFIED_CUSTOMER` (thêm ở `9a05355`, trả `400`) | `404 NOT_FOUND` theo fsd/04 E2, hoặc `422 RECIPIENT_INVALID` (`reason = NOT_ACTIVE`) theo E7 |
+| `INVALID_PHONE_NUMBER` (thêm ở `9a05355`) | `VALIDATION_ERROR` |
+| `LEDGER_ACCOUNT_CLOSED`, `CURRENCY_MISMATCH`, `LEDGER_UNBALANCED` (lỗi nội bộ của ledger) | Không có |
+
+2026-10-25: `NOT_SUPPORTED_YET` không còn trong mã. Số mã không có trong catalogue tăng từ 11 lên 15.
 
 fsd/README §5 lập thông báo tiếng Việt theo mã của catalogue, nên client sẽ không hiển thị đúng thông báo với các mã trong mã nguồn.
 
@@ -313,9 +322,22 @@ fsd/README §5 lập thông báo tiếng Việt theo mã của catalogue, nên c
 
 So với 12 bước của UC-04.01: chưa kiểm PIN (bước 4; trường `pin` bị bỏ qua), chưa kiểm khoảng số tiền BR-28 (`AMOUNT_OUT_OF_RANGE`, bước 5; mã chỉ kiểm `amount > 0`), chưa step-up (bước 6), chưa hạn mức (bước 9), chưa có `lookupRecipient`, và `recipient.phone` trả `422 NOT_SUPPORTED_YET`. CLAUDE.md ghi đây là khoảng trống có chủ đích, có TODO tại đúng vị trí. Sprint 1 có T-08 (PIN) và US-42 (hạn mức), nên đây là trạng thái tiến độ hơn là lỗi tài liệu.
 
+**Cập nhật 2026-10-25** (`9a05355`, SCRUM-25): đã có module `identity` với `GetCustomerByPhone`, và `createTransfer` đã nhận `recipient.phone`. Vẫn chưa có PIN, khoảng số tiền, step-up, hạn mức và endpoint `lookupRecipient`. CLAUDE.md mục "Deliberate gaps" vẫn ghi `recipient.phone` trả `422 NOT_SUPPORTED_YET`, nên đã lỗi thời. Lỗi trong phần mới làm được tách ra ISS-41.
+
 ### ISS-40 — `GET /v1/wallet` · Thấp
 
 `wallethttp.InquiryBalanceByWalletID` đọc header `X-Dev-Customer-Id` trực tiếp (biến tên `walletId` nhưng giá trị là customer id) thay vì lấy khách hàng từ `auth.CustomerFrom`, nên sẽ không chạy khi đổi sang JWT. `status_reason` trả chuỗi rỗng `""` trong khi schema `Wallet.status_reason` là `string | null`. `held_balance` cố định 0, khớp ghi chú M0 của fsd/07.
+
+### ISS-41 — `createTransfer` trên `development` sai khi xử lý người nhận · Cao
+
+Quan sát ở `internal/payment/http/handler.go` (`createTransfer`, commit `9a05355`). Đây là phần đang làm dở của SCRUM-25, ghi lại vì nó làm lệch hành vi đã đặc tả ở fsd/04 và hỏng luồng chuyển tiền duy nhất đã chạy được:
+
+1. Nhánh `recipient.wallet_id` bị xóa. Khi request chỉ có `wallet_id`, mã ví người nhận là UUID rỗng, nên chuyển ví–ví theo `wallet_id` không còn chạy. OpenAPI và fsd/04 vẫn cho phép cả `wallet_id` và `phone`.
+2. Khi chuyển theo SĐT, mã gán cho người nhận là `customer.Id` chứ không phải mã ví. Theo `wallet.wallets`, `id` khác `customer_id` (migration 0003), nên giao dịch sẽ không tìm thấy ví.
+3. Sau khi trả `UNVERIFIED_CUSTOMER` thiếu `return`, nên handler vẫn gọi `Transfer` và ghi response lần hai.
+4. Mã lỗi khác catalogue và fsd/04 E2 (xem ISS-37).
+
+**Đề xuất** [ĐỀ XUẤT]: tra SĐT → khách hàng → ví (qua `wallet`), giữ nhánh `wallet_id`, thêm `return`, dùng `NOT_FOUND` / `RECIPIENT_INVALID` theo fsd/04, và thêm integration test cho cả hai kiểu người nhận. Việc sửa mã thuộc repo wallet-core, không nằm trong lần chuẩn hóa tài liệu.
 
 ---
 
@@ -326,7 +348,7 @@ So với 12 bước của UC-04.01: chưa kiểm PIN (bước 4; trường `pin`
 | F ↔ US hai chiều | Script đọc bảng prd §7 và urd §2, mở rộng dải `…` | 2 lệch (ISS-10) |
 | BR được trích dẫn có tồn tại | Quét mọi `BR-xx` trong 11 file tài liệu và OpenAPI | Không có BR "ma" (chỉ có dải `BR-56…64` vắt qua số không dùng như BR-59, không phải lỗi) |
 | Mã lỗi FSD ↔ OpenAPI | So bảng fsd/README §5 với `x-error-codes` (38 mã) | Khớp hoàn toàn |
-| Mã lỗi mã nguồn ↔ OpenAPI | Quét `apperr.New(...)` trong `internal/` | 11 mã không có trong catalogue (ISS-37) |
+| Mã lỗi mã nguồn ↔ OpenAPI | Quét `apperr.New(...)` trong `internal/` | 11 mã không có trong catalogue (ISS-37); 15 mã ở `9a05355` (2026-10-25) |
 | Key cấu hình FSD ↔ business-rules §5 | Quét key dạng `a.b` | 1 key thiếu (ISS-27) |
 | US có AC | Quét mục **US-xx** trong urd §2 | 41/43 (ISS-26) |
 | OpenAPI bản gốc ↔ bản sao | `diff` | 4 khác biệt (ISS-36) |

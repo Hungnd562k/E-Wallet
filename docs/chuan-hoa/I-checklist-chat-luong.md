@@ -1,6 +1,6 @@
 # I. Checklist chất lượng và trạng thái sẵn sàng
 
-> Trạng thái: **DRAFT** · Lập: 2026-10-21 · Cập nhật: 2026-10-21 (sau câu trả lời Q-01, Q-02, Q-06, Q-07) · Phạm vi: `E-Wallet` nhánh `master` commit `087c3ff`; đối chiếu `E-Wallet-Wallet-Core` commit `7332c9e`
+> Trạng thái: **DRAFT** · Lập: 2026-10-21 · Cập nhật: 2026-10-21 (sau câu trả lời Q-01, Q-02, Q-06, Q-07), 2026-10-25 (đối chiếu lại mã `development@9a05355`) · Phạm vi: `E-Wallet` nhánh `master` commit `087c3ff`; đối chiếu `E-Wallet-Wallet-Core` commit `7332c9e`
 > Liên quan: [README](README.md) · [D. Vấn đề](D-bao-cao-van-de.md) · [F. Câu hỏi](F-cau-hoi-xac-nhan.md)
 
 Kết quả: **Đạt** · **Một phần** · **Chưa đạt** · **Chưa kiểm** (không kiểm trong lần này).
@@ -29,7 +29,7 @@ Kết quả: **Đạt** · **Một phần** · **Chưa đạt** · **Chưa kiể
 | 18 | Có phiên bản, người review, phê duyệt | **Chưa đạt** | ISS-28 |
 | 19 | Có bảng thuật ngữ | **Chưa đạt** | Bản nháp ở [B §6](B-bo-tai-lieu-chuan-hoa.md#6-bảng-thuật-ngữ) (ISS-29) |
 | 20 | Tài liệu nằm ở nhánh mặc định của repo | Đạt | ISS-34 đã xử lý (CHG-03) |
-| 21 | Tài liệu và mã nguồn không lệch nhau | Một phần | Mã lỗi, `getPayment`, `createTransfer`, `GET /v1/wallet` (ISS-37…40); OpenAPI đã chốt nguồn (ISS-36) |
+| 21 | Tài liệu và mã nguồn không lệch nhau | Một phần | Mã lỗi, `getPayment`, `createTransfer`, `GET /v1/wallet` (ISS-37…41); OpenAPI đã chốt nguồn (ISS-36) |
 | 22 | Hai contract OpenAPI lint sạch | Chưa kiểm | docs/README ghi "lint sạch"; không chạy lại (GD-07) |
 | 23 | Sơ đồ Mermaid hiển thị được | Chưa kiểm | Không render trong lần này |
 | 24 | Tách bạch quy định pháp luật và quyết định sản phẩm | Đạt | Nhãn [L]/[P] trên từng BR; prd §10 rủi ro "lẫn lộn [P] và [L]" |
@@ -56,7 +56,7 @@ Tổng: Đạt 9 · Một phần 7 · Chưa đạt 6 · Chưa kiểm 2 (trên 24
 | fsd/README + 04, 07, 09 | Dùng được cho M0, có điều kiện | DRAFT; Q-01, Q-02 đã chốt theo FSD |
 | architecture.md | Cần cập nhật | ADR-13 và §11 không còn đúng (ISS-05); §5.2 đã khớp FSD (CHG-04, 05) |
 | erd.md | Dùng được | Có thể làm chuẩn tham chiếu cho tên gọi (ISS-13) |
-| wallet-core [`api/openapi.yaml`](https://github.com/Hungnd562k/E-Wallet-Wallet-Core/blob/main/api/openapi.yaml) | Dùng được | Nguồn chuẩn ở repo wallet-core (CHG-06); `x-br` BR-28 (ISS-15) |
+| wallet-core [`api/openapi.yaml`](https://github.com/Hungnd562k/E-Wallet-Wallet-Core/blob/development/api/openapi.yaml) | Dùng được | Nguồn chuẩn ở repo wallet-core (CHG-06); `x-br` BR-28 (ISS-15) |
 | corebank.openapi.yaml | Dùng được | Không phát hiện vấn đề riêng |
 | progression/jira-backlog-draft.md | Tham khảo | Không phải nguồn yêu cầu |
 | `Q&A.md` | Chưa dùng được | Chỉ có câu hỏi (ISS-29) |
@@ -66,7 +66,7 @@ Tổng: Đạt 9 · Một phần 7 · Chưa đạt 6 · Chưa kiểm 2 (trên 24
 
 | # | Kiểm tra | Kết quả |
 |---|---|---|
-| 1 | Mỗi `ISS-xx` trong bảng tổng hợp D có mục chi tiết | Đạt (40/40) |
+| 1 | Mỗi `ISS-xx` trong bảng tổng hợp D có mục chi tiết | Đạt (41/41) |
 | 2 | Mỗi `Q-xx` được D trích dẫn đều có trong F, và ngược lại | Đạt (31/31) |
 | 3 | Mọi `ISS-xx` được C, H, I trích dẫn đều tồn tại trong D | Đạt |
 | 4 | Nội dung yêu cầu ở C chép nguyên văn từ nguồn bằng script, không gõ lại | Đạt |

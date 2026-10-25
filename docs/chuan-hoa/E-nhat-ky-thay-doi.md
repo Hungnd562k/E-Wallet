@@ -17,7 +17,9 @@ Nguyên tắc: **không sửa nội dung nghiệp vụ** của tài liệu ngu�
 | CHG-06 | 2026-10-21 | `docs/api/wallet-core.openapi.yaml` (xóa), `redocly.yaml`, `.redocly.lint-ignore.yaml` (xóa), link ở `docs/README.md`, `architecture.md` §7, §11, `fsd/README.md`; wallet-core `api/openapi.yaml`, `redocly.yaml`, `.redocly.lint-ignore.yaml` | Chuyển nguồn chuẩn | OpenAPI của wallet-core chuyển về repo `E-Wallet-Wallet-Core` (Q-07). Bản ở wallet-core được đồng bộ với bản mới nhất của docs trước, kèm cấu hình lint | [ĐÃ XÁC NHẬN] | Không |
 | CHG-07 | 2026-10-21 | wallet-core `CLAUDE.md` | Sửa tham chiếu | `scope.md` → `business-rules.md`, thêm `fsd/`; mô tả `api/openapi.yaml` là nguồn chuẩn (ISS-35, Q-07) | [ĐÃ BIÊN TẬP] | Không |
 
-CHG-03…05 và phần docs của CHG-06 nằm trong PR vào `main` của repo `E-Wallet`; phần wallet-core của CHG-06 và CHG-07 nằm trong PR của repo `E-Wallet-Wallet-Core`. Nên merge PR wallet-core trước, để contract luôn có ở ít nhất một nơi.
+| CHG-08 | 2026-10-25 | `docs/chuan-hoa/` D §8, G, H, I, README; link OpenAPI ở `docs/README.md`, `architecture.md`, `fsd/README.md` | Đồng bộ | Đối chiếu lại mã wallet-core `development@9a05355`: cập nhật ISS-37, ISS-39, thêm ISS-41, cập nhật cột Triển khai ở H. Sửa nhãn nhánh của wallet-core từ `main` thành `development` (GD-03). Link OpenAPI trỏ sang nhánh `development` | [ĐÃ BIÊN TẬP] | Không |
+
+CHG-03…05 và phần docs của CHG-06 nằm trong PR vào `main` của repo `E-Wallet`; phần wallet-core của CHG-06 và CHG-07 nằm trong PR của repo `E-Wallet-Wallet-Core` (#1, base `development`). Nên merge PR wallet-core trước, để contract luôn có ở ít nhất một nơi.
 
 ## 2. Thay đổi đề xuất, chờ xác nhận
 
@@ -56,3 +58,4 @@ Các thay đổi dưới đây **chưa được thực hiện**. Mỗi dòng s�
 
 - 2026-10-21: bản đầu A–I, dựa trên `E-Wallet@087c3ff` và `E-Wallet-Wallet-Core@7332c9e`.
 - 2026-10-21: áp dụng câu trả lời Q-01, Q-02, Q-06, Q-07 (CHG-03…07); cập nhật D, E, F, G, I và các tham chiếu OpenAPI ở B, H. A, C giữ nguyên là ảnh chụp lúc rà soát.
+- 2026-10-25: đối chiếu lại với wallet-core `development@9a05355` (CHG-08).
