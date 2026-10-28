@@ -92,7 +92,7 @@ Không bật "Require approvals": GitHub không cho tác giả tự approve PR c
 |---|---|---|
 | 0 | CI cho wallet-core (SCRUM-15) | Đang làm |
 | 1 | Tài liệu: file này, review-policy, review-context, ADR-16…22, `CLAUDE.md` cho repo docs; `REVIEW.md` cho wallet-core | Đang làm |
-| 2 | Workflow advisory ở wallet-core; chạy thử trên PR cũ #1 (có SCRUM-25 đã revert, lỗi đã biết ở ISS-41), #5, #6, #7 và ghi kết quả vào bảng đo | Chưa làm |
+| 2 | Workflow advisory ở wallet-core; chạy thử trên PR cũ #1, #5, #6, #7 và một PR riêng cho commit SCRUM-25 (lỗi đã biết ở ISS-41), ghi kết quả vào bảng đo | Đang làm (đã chạy #1, #7) |
 | 3 | Kết nối Jira (cần secret `JIRA_BASE_URL`, `JIRA_EMAIL`, `JIRA_API_TOKEN`) | Workflow đã hỗ trợ, chờ secret |
 | 4 | Sau 2026-11-01: bật required status checks cho `development` | Chưa làm |
 
@@ -110,3 +110,4 @@ Ghi vào [progression/ai-review-metrics.md](../progression/ai-review-metrics.md)
 ## 10. Lịch sử
 
 - 2026-10-28: Bản đầu, viết lại từ `review_plan/planning.md` theo câu trả lời Q-R01…Q-R28.
+- 2026-10-28: Giai đoạn 2 bắt đầu (#1, #7). Reviewer đọc `REVIEW.md` từ nhánh mặc định khi head chưa có file.
