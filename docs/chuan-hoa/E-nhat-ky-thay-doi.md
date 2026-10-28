@@ -19,6 +19,8 @@ Nguyên tắc: **không sửa nội dung nghiệp vụ** của tài liệu ngu�
 
 | CHG-08 | 2026-10-25 | `docs/chuan-hoa/` D §8, G, H, I, README; link OpenAPI ở `docs/README.md`, `architecture.md`, `fsd/README.md` | Đồng bộ | Đối chiếu lại mã wallet-core `development@9a05355`: cập nhật ISS-37, ISS-39, thêm ISS-41, cập nhật cột Triển khai ở H. Sửa nhãn nhánh của wallet-core từ `main` thành `development` (GD-03). Link OpenAPI trỏ sang nhánh `development` | [ĐÃ BIÊN TẬP] | Không |
 
+| CHG-09 | 2026-10-25 | `docs/fsd/README.md` §1, §6, §7, §8 (mới), §9; `fsd/09` UC-09.02 (mới), §1.3; `fsd/04` UC-04.01; `chuan-hoa/` D, E, H | Bổ sung FSD M0 | Rà fsd/ theo phạm vi M0: viết UC-09.02 (đăng nhập back-office, API ở M0) và fsd/README §8 (dữ liệu seed, xác thực dev của khách hàng, luồng chưa có ở M0, danh sách API M0). Các quyết định mới có nhãn [P] trong FSD. Ghi nhận revert SCRUM-25 trên wallet-core (ISS-41) | [P] | Có: thời hạn token staff, thu hồi phiên khi dùng lại refresh token, M0 chưa kiểm `X-Device-Id` |
+
 CHG-03…05 và phần docs của CHG-06 nằm trong PR vào `main` của repo `E-Wallet`; phần wallet-core của CHG-06 và CHG-07 nằm trong PR của repo `E-Wallet-Wallet-Core` (#1, base `development`). Nên merge PR wallet-core trước, để contract luôn có ở ít nhất một nơi.
 
 ## 2. Thay đổi đề xuất, chờ xác nhận
@@ -59,3 +61,4 @@ Các thay đổi dưới đây **chưa được thực hiện**. Mỗi dòng s�
 - 2026-10-21: bản đầu A–I, dựa trên `E-Wallet@087c3ff` và `E-Wallet-Wallet-Core@7332c9e`.
 - 2026-10-21: áp dụng câu trả lời Q-01, Q-02, Q-06, Q-07 (CHG-03…07); cập nhật D, E, F, G, I và các tham chiếu OpenAPI ở B, H. A, C giữ nguyên là ảnh chụp lúc rà soát.
 - 2026-10-25: đối chiếu lại với wallet-core `development@9a05355` (CHG-08).
+- 2026-10-25: bổ sung FSD còn thiếu của M0 (CHG-09); ghi nhận wallet-core `development@85493db` đã revert SCRUM-25.

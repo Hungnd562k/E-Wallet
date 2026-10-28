@@ -1,6 +1,6 @@
 # FSD — Đặc tả chức năng
 
-> Trạng thái: **DRAFT — phạm vi M0** · Cập nhật: 2026-10-18
+> Trạng thái: **DRAFT — phạm vi M0** · Cập nhật: 2026-10-25
 > Liên quan: [README](../README.md) · [urd.md](../urd.md) (`US-xx`) · [prd.md](../prd.md) (`F-xx`) · [business-rules.md](../business-rules.md) (`BR-xx`) · [erd.md](../erd.md) · [wallet-core OpenAPI](https://github.com/Hungnd562k/E-Wallet-Wallet-Core/blob/development/api/openapi.yaml)
 
 FSD mô tả **từng chức năng chạy chi tiết ra sao**: các bước, màn hình, trường dữ liệu, kiểm tra, thông báo, trạng thái và dữ liệu thay đổi. FSD **không** lặp lại:
@@ -9,7 +9,7 @@ FSD mô tả **từng chức năng chạy chi tiết ra sao**: các bước, mà
 - *nội dung* quy tắc nghiệp vụ → business-rules.md (FSD chỉ trỏ `BR-xx` và nói quy tắc được kiểm tra **ở bước nào**);
 - *chi tiết kỹ thuật* (schema request/response, cột DB) → OpenAPI, erd.md.
 
-Ứng với milestone M0, hệ thống chỉ giao **API**. Màn hình app vẫn được đặc tả ở đây vì đó là yêu cầu chức năng; app Flutter làm ở M4.
+Ứng với milestone M0, hệ thống chỉ giao **API**. Màn hình app vẫn được đặc tả ở đây vì đó là yêu cầu chức năng; app Flutter làm ở M4. Dữ liệu seed và các giới hạn của M0 gom ở [§8](#8-phạm-vi-m0-dữ-liệu-seed-và-giới-hạn).
 
 ---
 
@@ -25,7 +25,7 @@ FSD mô tả **từng chức năng chạy chi tiết ra sao**: các bước, mà
 | `06-qr-payment-refund.md` | Thanh toán QR, hoàn tiền, merchant API | M2 | Chưa viết |
 | [07-wallet-history-limits.md](07-wallet-history-limits.md) | Ví, hạn mức, lịch sử, trạng thái giao dịch (đóng ví, thông báo: M4) | **M0** / M4 | Draft (phần M0) |
 | `08-disputes.md` | Tra soát, khiếu nại | M4 | Chưa viết |
-| [09-backoffice-ops.md](09-backoffice-ops.md) | Audit log (M0); đối soát, duyệt KYC, phong tỏa, điều chỉnh, AML, cấu hình | **M0** / M1 / M4 | Draft (phần M0) |
+| [09-backoffice-ops.md](09-backoffice-ops.md) | Audit log, đăng nhập back-office (M0); đối soát, duyệt KYC, phong tỏa, điều chỉnh, AML, cấu hình | **M0** / M1 / M4 | Draft (phần M0) |
 
 ## 2. Quy ước
 
@@ -203,6 +203,7 @@ Không hiển thị cho khách hàng lý do chi tiết của `FRAUD_SUSPECTED` (
 | UC-07.06 | Đóng ví do không hoạt động | 07 | M4 | Chưa viết |
 | UC-07.07 | Nhận thông báo giao dịch | 07 | M4 | Chưa viết |
 | UC-09.01 | Tra cứu audit log | 09 | M0 | Draft |
+| UC-09.02 | Đăng nhập back-office | 09 | M0 (API) / M4 (UI) | Draft |
 
 ## 7. Ma trận truy vết US ↔ UC ↔ BR ↔ API
 
@@ -217,7 +218,65 @@ Chỉ gồm các UC đã viết. Cập nhật khi thêm file.
 | US-41 | UC-07.03 | — | `listWalletActivities` | `payment.wallet_activities` |
 | US-25 | UC-07.04 | BR-45, 46 | `getPayment` | `payment.payments` |
 | US-81 | UC-09.01 | BR-64, 71 | `adminListAuditLogs` | `audit.audit_logs` |
+| — (hạ tầng cho US-70…81) | UC-09.02 | BR-71 | `adminLogin`, `adminRefreshToken` | `backoffice.staff_users`, `backoffice.staff_sessions`, `audit.audit_logs` |
 
-## 8. Lịch sử
+## 8. Phạm vi M0: dữ liệu seed và giới hạn
+
+M0 chưa có onboarding (fsd/01, M3), ngân hàng (M1), merchant (M2) và giao diện (M4). Mục này gom lại những gì M0 **thay thế tạm** và những luồng **chưa xảy ra** ở M0, để dev và tester không phải dò từng UC. Khi milestone sau làm phần tương ứng, xóa dòng ở đây.
+
+### 8.1. Dữ liệu seed
+
+Chỉ chạy ở profile `dev` (prd §9). Chạy lại nhiều lần không tạo trùng. Mọi giá trị là dữ liệu demo, không dùng ngoài môi trường local / test.
+
+| Đối tượng | Yêu cầu | Dùng cho |
+|---|---|---|
+| Khách hàng | Ít nhất 2 khách hàng, SĐT dạng `+84…` khác nhau, `onboarding_status = KYC_VERIFIED`, có `full_name` | UC-04.01 (gửi và nhận), CF-02 (che tên) |
+| Ví | Mỗi khách hàng 1 ví `ACTIVE`, số dư ban đầu nạp bằng bút toán nạp tiền thật (erd §3.2 dòng 1: debit `SAFEGUARD_BANK`, credit `WALLET`), không sửa thẳng số dư | UC-07.01, SM-01 |
+| PIN | Mỗi khách hàng có `identity.credentials.pin_hash` (argon2id) của một PIN demo đã biết, bộ đếm = 0 | UC-04.02 |
+| Thiết bị | Mỗi khách hàng 1 thiết bị `ACTIVE` với `bound_at` cách hiện tại hơn `auth.new_device_window_hours`, để hạn chế thiết bị mới (BR-38) không áp dụng [P] | UC-04.01 E11 |
+| Staff | Mỗi role `SUPPORT`, `OPERATOR`, `CHECKER`, `ADMIN` có ít nhất 1 tài khoản `ACTIVE`, mật khẩu demo đã biết, không bật MFA; thêm 1 tài khoản `DISABLED` để test | UC-09.01, UC-09.02 |
+| Tham số | `platform.settings` có đủ key của business-rules §5 với giá trị mặc định | Mọi UC |
+| Ledger hệ thống | Có sẵn các tài khoản hệ thống (`SAFEGUARD_BANK`…) theo erd §3 | Bút toán seed |
+
+Test tải SM-01 có thể tạo thêm nhiều ví theo cùng quy tắc trên.
+
+### 8.2. Xác thực khách hàng ở M0
+
+Đăng nhập (`login`, `refreshToken`, `logout`) thuộc F-01, làm ở M3 (prd §7). Ở M0 [P]:
+
+- Client local / test xác định khách hàng bằng cơ chế xác thực dev của wallet-core (header `X-Dev-Customer-Id`), chỉ bật ở profile `dev`. Khi có JWT ở M3, cơ chế này bị bỏ; hành vi của các UC không đổi.
+- Vì chưa có đăng nhập nên chưa có gắn thiết bị: bước 1 của `createTransfer` (fsd/04) chỉ xác định khách hàng, **chưa** kiểm `X-Device-Id`; `401 DEVICE_NOT_BOUND` và CF-07 áp dụng từ M3.
+- Mã `401 UNAUTHENTICATED` vẫn trả khi thiếu hoặc sai header dev.
+
+Staff **có** đăng nhập thật ở M0 (UC-09.02), vì audit `staff.login` và phân quyền theo role của UC-09.01 thuộc M0.
+
+### 8.3. Luồng chưa xảy ra ở M0
+
+| Hạng mục | Ở M0 | Từ | Ghi ở |
+|---|---|---|---|
+| Step-up OTP + khuôn mặt | Server kiểm ngưỡng và trả `STEP_UP_REQUIRED`, nhưng chưa hoàn tất được challenge; giao dịch vượt ngưỡng không hoàn tất | M3 | CF-05, UC-04.01 A2 |
+| Hạn chế thiết bị mới (BR-38) | Không xảy ra (thiết bị seed đã qua 24 giờ, chưa có đổi thiết bị) | M3 | UC-04.01 E11 |
+| Giao dịch `PENDING`, `held_balance > 0` | Không có (chỉ có chuyển ví–ví, đồng bộ) | M1 | UC-07.01, UC-07.04 A1, A2 |
+| Tra soát (`Gửi tra soát`) | Không có | M4 | CF-03, UC-07.04 A2 |
+| Consumer của `payment.succeeded.v1` | Chưa có consumer; event vẫn được ghi vào outbox và được dispatcher xử lý | M4 | UC-04.01 §Dữ liệu |
+| Giao diện app và back-office | Chỉ có API | M4 | §Màn hình của từng UC |
+| Đặt, đổi, đặt lại PIN | PIN có sẵn từ seed; PIN bị khóa cứng chỉ mở được bằng cách chạy lại seed / sửa dữ liệu test | M3 | UC-04.02 E4 |
+
+### 8.4. API thuộc M0
+
+Danh sách `operationId` cần chạy được để đóng M0 (prd §9: F-04, 05, 06, 07 phần PIN, 14 phần API, 22):
+
+| Nhóm | `operationId` | UC |
+|---|---|---|
+| Ops | `healthz`, `readyz` | — |
+| Ví | `getWallet`, `getWalletLimits`, `listWalletActivities` | UC-07.01, 07.02, 07.03 |
+| Chuyển tiền | `lookupRecipient`, `createTransfer` (gồm PIN) | UC-04.01, 04.02 |
+| Giao dịch | `getPayment` | UC-07.04 |
+| Back-office | `adminLogin`, `adminRefreshToken`, `adminListAuditLogs` | UC-09.02, 09.01 |
+
+Các operation khác trong OpenAPI thuộc milestone sau.
+
+## 9. Lịch sử
 
 - 2026-10-18: bản đầu, phạm vi M0 (04, 07 phần M0, 09 phần audit).
+- 2026-10-25: thêm UC-09.02 (đăng nhập back-office, phần API ở M0) và §8 (dữ liệu seed, xác thực dev, luồng chưa có ở M0, danh sách API M0).

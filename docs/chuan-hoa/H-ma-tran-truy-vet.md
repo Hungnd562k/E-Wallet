@@ -40,7 +40,7 @@ Chép từ urd §4.
 | US-11 | F-08 | M1 | — | — | — | — | — | Chưa |
 | US-12 | F-08 | M1 | BR-13 | — | — | — | — | Chưa |
 | US-20 | F-09 | M1 | BR-20, 49 | — | — | — | — | Chưa |
-| US-21 | F-05 | M0 | BR-23…29, 47 | UC-04.01 | `lookupRecipient`, `createTransfer` | `payment.payments`, `ledger.*`, `limits.*`, `platform.idempotency_keys`, `platform.outbox_events` | — | Một phần — `POST /v1/transfers` đang chuyển sang tra theo `recipient.phone` (SCRUM-25) nhưng còn lỗi, nhánh `recipient.wallet_id` bị mất (ISS-41); chưa có PIN, hạn mức, `lookupRecipient` (ISS-39) |
+| US-21 | F-05 | M0 | BR-23…29, 47 | UC-04.01 | `lookupRecipient`, `createTransfer` | `payment.payments`, `ledger.*`, `limits.*`, `platform.idempotency_keys`, `platform.outbox_events` | — | Một phần — `POST /v1/transfers` theo `recipient.wallet_id`; bản chuyển sang `recipient.phone` (SCRUM-25) đã bị revert ở `85493db` (ISS-41); chưa có PIN, hạn mức, `lookupRecipient` (ISS-39) |
 | US-22 | F-10 | M1 | BR-21, 50 | — | — | — | — | Chưa |
 | US-23 | F-11 | M1 | BR-22, 25, 50 | — | — | — | — | Chưa |
 | US-24 | F-07 | M0 / M3 | BR-35…40 | UC-04.02 | (trong mọi lệnh tạo giao dịch) | `identity.credentials` | — | Chưa — trường `pin` được nhận nhưng bị bỏ qua (ISS-39) |
@@ -169,5 +169,5 @@ Chép từ urd §4.
 | F-19 | M4 | fsd/09 | — | — |
 | F-20 | M4 | fsd/09 | — | — |
 | F-21 | M4 | fsd/09 | — | — |
-| F-22 | M0 | fsd/09 | UC-09.01 | — |
+| F-22 | M0 | fsd/09 | UC-09.01, UC-09.02 | — |
 | F-23 | M2 | fsd/06 | — | — |
