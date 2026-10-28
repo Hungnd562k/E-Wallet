@@ -18,6 +18,7 @@ Nguyên tắc: **không sửa nội dung nghiệp vụ** của tài liệu ngu�
 | CHG-07 | 2026-10-21 | wallet-core `CLAUDE.md` | Sửa tham chiếu | `scope.md` → `business-rules.md`, thêm `fsd/`; mô tả `api/openapi.yaml` là nguồn chuẩn (ISS-35, Q-07) | [ĐÃ BIÊN TẬP] | Không |
 
 | CHG-08 | 2026-10-25 | `docs/chuan-hoa/` D §8, G, H, I, README; link OpenAPI ở `docs/README.md`, `architecture.md`, `fsd/README.md` | Đồng bộ | Đối chiếu lại mã wallet-core `development@9a05355`: cập nhật ISS-37, ISS-39, thêm ISS-41, cập nhật cột Triển khai ở H. Sửa nhãn nhánh của wallet-core từ `main` thành `development` (GD-03). Link OpenAPI trỏ sang nhánh `development` | [ĐÃ BIÊN TẬP] | Không |
+| CHG-09 | 2026-10-28 | `docs/architecture.md` §11, §13, §15; `docs/review-process.md`, `review-policy.md`, `review-context.md` (mới); `CLAUDE.md` (mới); `progression/ai-review-metrics.md` (mới); `.github/workflows/ai-review.yml` (mới); `review_plan/` (xóa) | Thêm ADR | ADR-16 Polyrepo thay ADR-13 (Q-05 ý 1, ISS-05). ADR-17…22 và tài liệu quy trình review PR bằng AI, theo câu trả lời Q-R01…Q-R28 | [ĐÃ XÁC NHẬN] | Không |
 
 CHG-03…05 và phần docs của CHG-06 nằm trong PR vào `main` của repo `E-Wallet`; phần wallet-core của CHG-06 và CHG-07 nằm trong PR của repo `E-Wallet-Wallet-Core` (#1, base `development`). Nên merge PR wallet-core trước, để contract luôn có ở ít nhất một nơi.
 
