@@ -87,6 +87,10 @@ prd §9, F-20 và fsd/09 nói M4; architecture §3, §11 nói M3. [ĐỀ XUẤT]
 1. Tách `wallet-core` thành repo riêng có phải quyết định chủ ý không? Nếu có, [ĐỀ XUẤT] thêm ADR-16 "Polyrepo" thay ADR-13 và cập nhật architecture §11.
 2. Phiên bản Go tối thiểu là 1.26 (theo `go.mod` / CLAUDE.md)? Nếu đúng, sửa architecture §3.
 
+**Trả lời ý 1** [ĐÃ XÁC NHẬN] (chủ dự án, 2026-10-28): polyrepo là đúng; sẽ có thêm repo cho mobile, corebank-sim, merchant-sim, back-office-web. Ý 2 chưa trả lời.
+
+**Đã áp dụng**: CHG-09 (ADR-16, architecture §11).
+
 ### Q-06 — Nhánh chứa tài liệu (ISS-34)
 
 `docs/` chỉ có ở nhánh `master`; nhánh mặc định là `main`.

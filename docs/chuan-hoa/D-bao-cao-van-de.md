@@ -115,6 +115,7 @@ Không thể biết bản nào đúng nếu không hỏi. Liên quan ISS-28.
 
 **Ảnh hưởng**: lý do của ADR-13 ("đổi contract đồng bộ trong 1 commit") không còn đúng; cần cơ chế đồng bộ contract giữa repo.
 **Đề xuất** [ĐỀ XUẤT]: ghi một ADR mới (ví dụ ADR-16 "Polyrepo") thay thế ADR-13 nếu chủ dự án xác nhận đây là quyết định chủ ý.
+**Cập nhật 2026-10-28**: đã xác nhận (Q-05 ý 1), áp dụng ở CHG-09.
 
 ### ISS-06 — Phiên bản Go · Thấp · [MÂU THUẪN]
 

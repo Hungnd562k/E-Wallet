@@ -1,6 +1,6 @@
 # Architecture — E-Wallet Platform
 
-> Trạng thái: **DRAFT — chờ review** · Cập nhật: 2026-10-17
+> Trạng thái: **DRAFT — chờ review** · Cập nhật: 2026-10-28
 > Liên quan: [README](README.md) · [prd.md](prd.md) · [business-rules.md](business-rules.md) (mã `BR-xx`)
 
 ## 1. Mục tiêu & thuộc tính chất lượng
@@ -451,20 +451,18 @@ Chi tiết bảng, trigger và ma trận bút toán: [`erd.md`](erd.md).
 
 ## 11. Triển khai & cấu trúc repo
 
-Monorepo:
+Polyrepo (ADR-16): repo `E-Wallet` là trung tâm tài liệu, mỗi thành phần một repo code.
 
-```text
-E-Wallet/
-├── docs/                 # README, prd, urd, business-rules, fsd/, architecture, erd, api/, failure-scenarios
-├── wallet-core/          # Go — cmd/api, cmd/worker, internal/, migrations/, api/openapi.yaml (nguồn chuẩn của contract wallet-core)
-├── corebank/             # Java 21, Spring Boot 3, Gradle
-├── merchant-sim/         # Go
-├── app-mobile/           # Flutter
-├── back-office-web/      # React + Vite + TS (M3)
-└── deployments/
-    ├── docker-compose.yml
-    └── config/           # otel, prometheus, grafana, seed data
-```
+| Repo | Nội dung | Trạng thái |
+|---|---|---|
+| `E-Wallet` | `docs/` (README, prd, urd, business-rules, fsd/, architecture, erd, api/corebank, failure-scenarios), `progression/`, reusable workflow review AI | Có |
+| `E-Wallet-Wallet-Core` | Go: `cmd/api`, `cmd/worker`, `internal/`, `migrations/`, `api/openapi.yaml` (nguồn chuẩn của contract wallet-core), `docker-compose.yml` | Có (nhánh `development`) |
+| corebank-sim | Java 21, Spring Boot 3, Gradle | Chưa tạo |
+| merchant-sim | Go | Chưa tạo |
+| app-mobile | Flutter | Chưa tạo |
+| back-office-web | React + Vite + TS | Chưa tạo |
+
+Đổi contract giữa hai repo không còn đi trong một commit: repo sở hữu API đổi file OpenAPI trước (giữ tương thích ngược hoặc tăng version), repo dùng API cập nhật sau. Docker Compose dựng toàn hệ thống sẽ đặt ở repo riêng hoặc ở `E-Wallet` khi có từ hai thành phần chạy được.
 
 Docker Compose có 3 profile:
 
@@ -515,9 +513,16 @@ Các kịch bản E2E sẽ được liệt kê trong `failure-scenarios.md`.
 | ADR-10 | corebank dùng Spring Boot 3 / Java 21 | Đúng yêu cầu dùng Java, phổ biến trong ngân hàng | Quarkus |
 | ADR-11 | `merchant-sim` là app riêng | Mô phỏng đúng ranh giới hệ thống ngoài (HMAC, callback lỗi) | Mock trong `wallet-core` |
 | ADR-12 | Fault injection nằm trong corebank | Tái hiện được các kịch bản khó (commit-then-drop) một cách xác định | Toxiproxy (không mô phỏng được lỗi ở tầng nghiệp vụ) |
-| ADR-13 | Monorepo | 1 người phát triển, đổi contract đồng bộ trong 1 commit | Polyrepo |
+| ADR-13 | ~~Monorepo~~ **Đã thay bằng ADR-16** | 1 người phát triển, đổi contract đồng bộ trong 1 commit | Polyrepo |
 | ADR-14 | QR chỉ chứa token ngẫu nhiên | Không tin dữ liệu trong QR, chống sửa nội dung | QR chứa payload ký số |
 | ADR-15 | Mock provider là adapter trong `wallet-core` | Đủ để kiểm thử workflow, đổi sang provider thật chỉ cần thay adapter | Service mock riêng |
+| ADR-16 | Polyrepo; repo `E-Wallet` là trung tâm tài liệu, mỗi thành phần một repo code (thay ADR-13) | Thành phần khác ngôn ngữ (Go, Java, Flutter, React) cần CI và vòng đời riêng; đã tách thực tế. Hệ quả: đổi contract không còn nguyên tử, phải tương thích ngược hoặc có version | Monorepo (ADR-13). Không liên quan tới ADR-01: monorepo/polyrepo là cách lưu code, monolith/microservices là cách chạy |
+| ADR-17 | Review PR bằng Claude Code Action trên GitHub Actions, xác thực bằng OAuth token của gói Claude Pro; reviewer chỉ comment | Tận dụng gói đang có, tự định nghĩa context nghiệp vụ và Jira; hết hạn mức thì dừng review, không chặn merge | Claude Code Review chính thức (chỉ gói Team/Enterprise); service AI reviewer riêng (giữ làm hướng mở rộng khi cần nhiều agent, lưu lịch sử, nhiều repo) |
+| ADR-18 | `REVIEW.md` ở từng repo code, quy tắc chung ở `review-policy.md`; thang P0–P3; comment tiếng Việt | Quy tắc chung viết một lần, mỗi repo thêm phần riêng theo ngôn ngữ và bất biến của nó | Một `REVIEW.md` chung; severity mặc định của công cụ |
+| ADR-19 | Context Jira lấy qua REST API chỉ đọc từ key `SCRUM-NN` ở tiêu đề PR và commit; sub-task lấy AC từ ticket cha; docs `main` thắng khi lệch Jira | Dễ kiểm soát dữ liệu gửi đi, không cho AI quyền sửa Jira | Jira MCP server (thêm thành phần, quyền rộng hơn); đoán ticket từ tên file |
+| ADR-20 | Advisory đến hết Sprint 1 (2026-11-01), sau đó chặn merge bằng required status checks (CI, `ai-review` khi có P0/P1); không bật required approvals; chủ dự án tự merge | Dự án một người: GitHub không cho tự approve; repo public nên branch protection dùng được với tài khoản Free | Bật required approvals (khóa merge); để AI tự approve hoặc merge |
+| ADR-21 | Không tổ chức lại `docs/`; reviewer chọn context qua `review-context.md` | Giữ nguyên liên kết từ wallet-core `CLAUDE.md`, `go-map`, ma trận truy vết | Tách `docs/business/`, `docs/architecture/`, `docs/modules/` |
+| ADR-22 | Thread tác giả không tự sửa finding của AI reviewer khi chủ dự án chưa yêu cầu; tối đa 3 vòng review AI mỗi PR | Sau vài vòng hai agent trao đổi, lỗi thường chưa được sửa tận gốc hoặc sinh lỗi mới; tiết kiệm hạn mức | Cho reviewer và tác giả tự lặp tới khi hết finding |
 
 ---
 
@@ -538,3 +543,4 @@ Các kịch bản E2E sẽ được liệt kê trong `failure-scenarios.md`.
 
 - 2026-10-18: Review `architecture.md` done
 - 2026-10-21: §5.2 sequence theo thứ tự kiểm tra của fsd/04; làm rõ idempotency lưu lỗi nghiệp vụ (Q-01, Q-02). Contract wallet-core chuyển sang repo `E-Wallet-Wallet-Core` (Q-07).
+- 2026-10-28: ADR-16 Polyrepo thay ADR-13, viết lại §11 (Q-05, Q-R06). Thêm ADR-17…22 cho quy trình review PR bằng AI ([review-process.md](review-process.md)).
