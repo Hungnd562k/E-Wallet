@@ -1,6 +1,6 @@
 # Quy trình review PR bằng Claude
 
-> Trạng thái: **DRAFT — giai đoạn advisory** · Cập nhật: 2026-10-28
+> Trạng thái: **DRAFT — advisory, chặn merge cho `uat/v1.0.0`** · Cập nhật: 2026-10-28
 > Liên quan: [review-policy.md](review-policy.md) (quy tắc chung cho reviewer) · [review-context.md](review-context.md) (thành phần → tài liệu cần đọc) · [architecture.md §13](architecture.md#13-adr-tóm-tắt) (ADR-16…22) · [progression/ai-review-metrics.md](../progression/ai-review-metrics.md)
 
 Tài liệu này thay cho bản ghi chép `review_plan/planning.md` (2026-10-28). Các quyết định đã được chủ dự án xác nhận qua bộ câu hỏi Q-R01…Q-R28 cùng ngày.
@@ -28,6 +28,7 @@ Reviewer **chỉ nhận xét**. Người merge luôn là chủ dự án.
 | ADR-20 | Advisory đến hết Sprint 1; sau đó chặn merge bằng required status checks, không bật "required approvals" | Q-R16…19 |
 | ADR-21 | Không tổ chức lại thư mục docs; reviewer chọn context qua [review-context.md](review-context.md) | Q-R20, Q-R21 |
 | ADR-22 | Reviewer không tự kích hoạt sửa lỗi; tối đa 3 vòng review mỗi PR | Q-R22, Q-R23 |
+| ADR-23 | Chỉ tự chạy cho PR vào `uat/v1.0.0`; với nhánh này chặn merge khi có P0/P1 | Yêu cầu của chủ dự án, 2026-10-28 |
 
 Chi tiết lý do và phương án đã cân nhắc nằm ở bảng ADR trong architecture.md §13.
 
@@ -53,9 +54,9 @@ flowchart LR
 
 | Sự kiện | Chạy? |
 |---|---|
-| PR được mở (không phải draft), hoặc chuyển từ draft sang ready | Có |
-| Chủ repo comment `@claude review` trên PR | Có |
-| Push thêm commit vào PR | **Không** (tiết kiệm hạn mức; muốn review lại thì comment) |
+| PR vào `uat/v1.0.0` được mở (không phải draft), chuyển sang ready, hoặc có push mới | Có (tối đa 3 vòng, ADR-22) |
+| PR vào nhánh khác (`development`…) được mở hoặc push | **Không** (tiết kiệm hạn mức) |
+| Chủ repo comment `@claude review` trên bất kỳ PR nào | Có (chỉ để tham khảo, không ảnh hưởng merge gate) |
 | PR từ fork, hoặc comment của người không phải chủ repo | Không |
 
 ### 4.2. Các bước
@@ -72,12 +73,17 @@ Review chỉ dùng hạn mức gói Claude Pro, không chuyển sang API trả t
 
 ## 5. Merge gate
 
-| Điều kiện | Giai đoạn advisory (đến 2026-11-01) | Sau advisory |
+| Điều kiện | PR vào `uat/v1.0.0` (ADR-23) | PR vào nhánh khác |
 |---|---|---|
-| CI (lint, test, redocly) đỏ | Chủ dự án tự xem | Chặn merge (required status check) |
-| Reviewer báo P0/P1 | Chủ dự án tự xem | Chặn merge (check `ai-review` fail) |
+| CI (`lint`, `test`, `openapi`) đỏ | Chặn merge (required status check) | Chủ dự án tự xem |
+| Reviewer báo P0/P1 | Chặn merge: job `review / review` fail ở bước *Merge gate* | Chủ dự án tự xem |
 | Chỉ có P2/P3 | Chủ dự án quyết định | Chủ dự án quyết định |
 | Không có finding | Chỉ là tín hiệu tốt, không chứng minh code đúng | như trên |
+| Review không chạy (hết hạn mức, đủ 3 vòng, thiếu secret) | Không chặn; chủ dự án tự đọc PR | — |
+
+Cách gate hoạt động: reviewer ghi dòng `<!-- ai-review-verdict: p0=N p1=M -->` ở cuối comment tổng hợp; bước *Merge gate* đọc dòng đó của đúng lần chạy hiện tại và fail khi N+M > 0. Sửa lỗi rồi push để review lại. Lần chạy bằng `@claude review` gắn vào nhánh mặc định chứ không vào head của PR, nên không mở được gate.
+
+Bật gate (một lần, trong GitHub): **Settings → Rules → Rulesets → New branch ruleset**, target `uat/v1.0.0`, bật *Require a pull request before merging* (không cần approval) và *Require status checks to pass* với các check `lint`, `test`, `openapi`, `review / review`.
 
 Không bật "Require approvals": GitHub không cho tác giả tự approve PR của mình, nên với dự án một người tùy chọn này sẽ khóa merge. "Human review" nghĩa là chủ dự án đọc kết quả rồi tự bấm merge.
 
@@ -94,7 +100,7 @@ Không bật "Require approvals": GitHub không cho tác giả tự approve PR c
 | 1 | Tài liệu: file này, review-policy, review-context, ADR-16…22, `CLAUDE.md` cho repo docs; `REVIEW.md` cho wallet-core | Đang làm |
 | 2 | Workflow advisory ở wallet-core; chạy thử trên PR cũ #1, #5, #6, #7 và một PR riêng cho commit SCRUM-25 (lỗi đã biết ở ISS-41), ghi kết quả vào bảng đo | Đang làm (đã chạy #1, #7) |
 | 3 | Kết nối Jira (cần secret `JIRA_BASE_URL`, `JIRA_EMAIL`, `JIRA_API_TOKEN`) | Workflow đã hỗ trợ, chờ secret |
-| 4 | Sau 2026-11-01: bật required status checks cho `development` | Chưa làm |
+| 4 | Chặn merge cho PR vào `uat/v1.0.0` (ADR-23); chủ dự án bật ruleset | Workflow xong, chờ ruleset |
 
 ## 8. Cài đặt cho một repo code
 
@@ -110,4 +116,5 @@ Ghi vào [progression/ai-review-metrics.md](../progression/ai-review-metrics.md)
 ## 10. Lịch sử
 
 - 2026-10-28: Bản đầu, viết lại từ `review_plan/planning.md` theo câu trả lời Q-R01…Q-R28.
+- 2026-10-28: ADR-23: review tự động chỉ cho PR vào `uat/v1.0.0`, chặn merge khi có P0/P1.
 - 2026-10-28: Giai đoạn 2 bắt đầu (#1, #7). Reviewer đọc `REVIEW.md` từ nhánh mặc định khi head chưa có file.

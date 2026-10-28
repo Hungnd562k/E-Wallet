@@ -523,6 +523,7 @@ Các kịch bản E2E sẽ được liệt kê trong `failure-scenarios.md`.
 | ADR-20 | Advisory đến hết Sprint 1 (2026-11-01), sau đó chặn merge bằng required status checks (CI, `ai-review` khi có P0/P1); không bật required approvals; chủ dự án tự merge | Dự án một người: GitHub không cho tự approve; repo public nên branch protection dùng được với tài khoản Free | Bật required approvals (khóa merge); để AI tự approve hoặc merge |
 | ADR-21 | Không tổ chức lại `docs/`; reviewer chọn context qua `review-context.md` | Giữ nguyên liên kết từ wallet-core `CLAUDE.md`, `go-map`, ma trận truy vết | Tách `docs/business/`, `docs/architecture/`, `docs/modules/` |
 | ADR-22 | Thread tác giả không tự sửa finding của AI reviewer khi chủ dự án chưa yêu cầu; tối đa 3 vòng review AI mỗi PR | Sau vài vòng hai agent trao đổi, lỗi thường chưa được sửa tận gốc hoặc sinh lỗi mới; tiết kiệm hạn mức | Cho reviewer và tác giả tự lặp tới khi hết finding |
+| ADR-23 | Review AI chỉ tự chạy cho PR vào `uat/v1.0.0` (khi mở, ready, và mỗi lần push) và chặn merge khi có P0/P1 qua required status check; thay phần thời hạn advisory của ADR-20 cho nhánh này | Tập trung hạn mức gói Pro vào cổng phát hành; PR vào `development` vẫn review được bằng `@claude review` | Review mọi PR (tốn hạn mức); chờ hết Sprint 1 mới chặn (ADR-20) |
 
 ---
 
@@ -543,4 +544,4 @@ Các kịch bản E2E sẽ được liệt kê trong `failure-scenarios.md`.
 
 - 2026-10-18: Review `architecture.md` done
 - 2026-10-21: §5.2 sequence theo thứ tự kiểm tra của fsd/04; làm rõ idempotency lưu lỗi nghiệp vụ (Q-01, Q-02). Contract wallet-core chuyển sang repo `E-Wallet-Wallet-Core` (Q-07).
-- 2026-10-28: ADR-16 Polyrepo thay ADR-13, viết lại §11 (Q-05, Q-R06). Thêm ADR-17…22 cho quy trình review PR bằng AI ([review-process.md](review-process.md)).
+- 2026-10-28: ADR-16 Polyrepo thay ADR-13, viết lại §11 (Q-05, Q-R06). Thêm ADR-17…22 cho quy trình review PR bằng AI ([review-process.md](review-process.md)). ADR-23: review tự động và chặn merge cho PR vào `uat/v1.0.0`.
