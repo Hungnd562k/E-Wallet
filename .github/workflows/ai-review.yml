@@ -189,7 +189,8 @@ jobs:
 
             Đọc theo thứ tự:
             1. `e-wallet-docs/docs/review-policy.md`: quy tắc chung, severity, định dạng kết quả. Bắt buộc tuân theo.
-            2. `CLAUDE.md` và `REVIEW.md` ở root repo code.
+            2. `CLAUDE.md` và `REVIEW.md` ở root repo code. Nếu head chưa có `REVIEW.md` (PR cũ),
+               đọc bản trên nhánh mặc định: `git show origin/${{ github.event.repository.default_branch }}:REVIEW.md`.
             3. `.ai-review/jira.md`: ticket Jira của PR.
             4. `e-wallet-docs/docs/review-context.md`: với mỗi đường dẫn bị đổi, đọc đúng các mục tài liệu được chỉ ra
                trong `e-wallet-docs/docs/`. Tài liệu trong `CLAUDE.md` gọi là `../E-Wallet/docs/` chính là `e-wallet-docs/docs/`.
