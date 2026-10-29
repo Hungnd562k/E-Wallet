@@ -551,4 +551,4 @@ Các kịch bản E2E sẽ được liệt kê trong `failure-scenarios.md`.
 - 2026-10-18: Review `architecture.md` done
 - 2026-10-21: §5.2 sequence theo thứ tự kiểm tra của fsd/04; làm rõ idempotency lưu lỗi nghiệp vụ (Q-01, Q-02). Contract wallet-core chuyển sang repo `E-Wallet-Wallet-Core` (Q-07).
 - 2026-10-28: ADR-16 Polyrepo thay ADR-13, viết lại §11 (Q-05, Q-R06). Thêm ADR-17…22 cho quy trình review PR bằng AI ([review-process.md](review-process.md)). ADR-23: review tự động và chặn merge cho PR vào `uat/v1.0.0`.
-- 2026-10-29: §10 thêm quy tắc làm sạch `X-Request-Id`, `traceparent`, `User-Agent` (AIR-1).
+- 2026-10-29: §10 thêm quy tắc làm sạch `X-Request-Id`, `traceparent`, `User-Agent` (AIR-1). §4.3 thêm phụ thuộc `payment → audit`, `wallet → audit` (SCRUM-78).
