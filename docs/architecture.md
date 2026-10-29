@@ -433,6 +433,8 @@ Chi tiết bảng, trigger và ma trận bút toán: [`erd.md`](erd.md).
 - **Logs**: slog JSON có redaction (§8.2), level theo môi trường.
 - **Traces**: OpenTelemetry SDK (Go và Java) → OTel Collector → Jaeger.
 - **Metrics** (Prometheus):
+- **User-Agent** có độ dài tối đa `512 bytes`, nếu dài hơn thì cắt theo text (khác với cắt theo bytes, có thể gây lỗi ký tự)
+- **X-Request-Id** chỉ nhận `[A-Za-z0-9._-]`, dài từ `1-128 bytes`
 
 | Metric | Ý nghĩa |
 |---|---|
