@@ -1,6 +1,6 @@
 # ERD — Mô hình dữ liệu
 
-> Trạng thái: **REVIEWED — Đã review** · Cập nhật: 2026-10-17
+> Trạng thái: **REVIEWED — Đã review** · Cập nhật: 2026-10-29
 > Liên quan: [README](README.md) · [business-rules.md](business-rules.md) (`BR-xx`) · [architecture.md](architecture.md) (§4 module, §9 kiến trúc dữ liệu)
 
 ## 1. Quy ước
@@ -974,11 +974,13 @@ UK `(rule_code, customer_id, window_start)` để không tạo trùng alert.
 | resource_type, resource_id | TEXT | | |
 | outcome | TEXT | CHECK IN (`SUCCESS`,`DENIED`,`ERROR`) | |
 | reason | TEXT | NULL | Bắt buộc với thao tác của staff |
-| request_id, trace_id | TEXT | | |
-| ip, user_agent | TEXT | NULL | |
+| request_id, trace_id | TEXT | | Lấy từ context của request, đã làm sạch ở biên (architecture §10) |
+| ip, user_agent | TEXT | NULL | `user_agent` đã làm sạch ở biên: UTF-8 hợp lệ, tối đa 512 byte |
 | metadata | JSONB | | **Không** chứa CCCD, ảnh, OTP, PIN, token (BR-71) |
 
 Index: `(resource_type, resource_id, occurred_at)`, `(actor_id, occurred_at)`.
+
+Ghi audit chạy **trong cùng transaction** với thao tác nghiệp vụ: không ghi được audit thì thao tác rollback. Riêng các cột lấy từ header do client gửi (`request_id`, `user_agent`) **không bao giờ** được là nguyên nhân làm ghi audit thất bại; chúng được làm sạch trước khi vào context (architecture §10).
 
 ### 4.13. `backoffice`
 
@@ -1239,3 +1241,4 @@ Theo BR-73. Job `platform.cleanup` và `kyc.purge` thực hiện.
 ## 10. Lịch sử cập nhật
 
 - 2026-10-18: Review `erd.md` done
+- 2026-10-29: §4.12 ghi rõ audit chạy chung transaction và `request_id`, `user_agent` được làm sạch ở biên (AIR-1).

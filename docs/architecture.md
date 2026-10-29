@@ -1,6 +1,6 @@
 # Architecture — E-Wallet Platform
 
-> Trạng thái: **DRAFT — chờ review** · Cập nhật: 2026-10-28
+> Trạng thái: **DRAFT — chờ review** · Cập nhật: 2026-10-29
 > Liên quan: [README](README.md) · [prd.md](prd.md) · [business-rules.md](business-rules.md) (mã `BR-xx`)
 
 ## 1. Mục tiêu & thuộc tính chất lượng
@@ -430,6 +430,10 @@ Chi tiết bảng, trigger và ma trận bút toán: [`erd.md`](erd.md).
 ## 10. Observability
 
 - **Correlation**: nhận hoặc sinh `X-Request-Id` và `traceparent` (W3C) ở `wallet-api`, lưu vào outbox event, worker khôi phục context rồi truyền tiếp sang corebank. Log, trace và audit đều mang `request_id` và `trace_id`.
+- **Làm sạch header của client** (middleware, trước khi vào context). Các giá trị này đi vào log và cột `TEXT` của audit, nên không được làm hỏng request:
+  - `X-Request-Id`: chỉ nhận `[A-Za-z0-9._-]`, dài 1–128. Không khớp thì **sinh id mới**, không sửa id của client.
+  - `traceparent`: sai định dạng W3C thì sinh trace id mới.
+  - `User-Agent`: thay byte UTF-8 không hợp lệ bằng `U+FFFD`, cắt theo ký tự sao cho tối đa 512 byte.
 - **Logs**: slog JSON có redaction (§8.2), level theo môi trường.
 - **Traces**: OpenTelemetry SDK (Go và Java) → OTel Collector → Jaeger.
 - **Metrics** (Prometheus):
@@ -547,3 +551,4 @@ Các kịch bản E2E sẽ được liệt kê trong `failure-scenarios.md`.
 - 2026-10-18: Review `architecture.md` done
 - 2026-10-21: §5.2 sequence theo thứ tự kiểm tra của fsd/04; làm rõ idempotency lưu lỗi nghiệp vụ (Q-01, Q-02). Contract wallet-core chuyển sang repo `E-Wallet-Wallet-Core` (Q-07).
 - 2026-10-28: ADR-16 Polyrepo thay ADR-13, viết lại §11 (Q-05, Q-R06). Thêm ADR-17…22 cho quy trình review PR bằng AI ([review-process.md](review-process.md)). ADR-23: review tự động và chặn merge cho PR vào `uat/v1.0.0`.
+- 2026-10-29: §10 thêm quy tắc làm sạch `X-Request-Id`, `traceparent`, `User-Agent` (AIR-1).
