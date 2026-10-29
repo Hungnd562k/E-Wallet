@@ -183,10 +183,12 @@ flowchart TD
     payment --> authz
     payment --> banklink
     payment --> merchant
+    payment --> audit
     reconciliation --> ledger
     reconciliation --> banklink
     reconciliation --> payment
     wallet --> ledger
+    wallet --> audit
     kyc --> identity
     banklink --> identity
     authz --> identity
