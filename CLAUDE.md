@@ -12,6 +12,13 @@ The documentation hub of the E-Wallet platform. It holds no code. Docs are writt
 - `docs/chuan-hoa/` is the standardization report (issues `ISS-xx`, questions `Q-xx` with the owner's answers). Check it before changing a source document.
 - `progression/` holds planning notes and the Jira backlog draft (Jira project `SCRUM`).
 
+## Searching the docs
+
+- If the local RAG engine is running on this machine (the `rag-docs` MCP server is connected and `search_docs` answers), search with `search_docs` first. Questions about business rules, requirements, architecture or decisions usually don't name the file, so meaning-based search finds them faster.
+- Then use grep, either when `search_docs` returns nothing useful or when you need an exact string (an ID such as `BR-63`, an error code, a column name) or every occurrence. `search_docs` returns only the top-k chunks.
+- A chunk marked STALE comes from a file that changed after ingest. Read that file for its current content.
+- If the RAG engine is not running, use grep directly.
+
 ## AI PR review
 
 - Process: `docs/review-process.md`. Shared reviewer rules: `docs/review-policy.md`. Path-to-docs index: `docs/review-context.md`.
